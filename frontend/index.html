@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Meen Finance — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4; }
+    .positive { color: #16a34a; }
+    .negative { color: #dc2626; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-20">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 pt-10 pb-16 relative">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-blue-200 text-sm" id="greeting"></p>
+        <h1 class="text-2xl font-bold mt-1">Meen Finance</h1>
+      </div>
+      <button onclick="toggleLang()" class="text-blue-200 text-sm border border-blue-400 rounded-full px-3 py-1">TH/EN</button>
+    </div>
+    <!-- Net Worth card overlapping -->
+    <div class="bg-white rounded-2xl shadow-lg p-4 mt-4 text-gray-800">
+      <p class="text-gray-500 text-xs uppercase tracking-wide" id="lbl-networth">Net Worth</p>
+      <p class="text-3xl font-bold mt-1" id="net-worth">—</p>
+      <div class="flex gap-4 mt-3 text-sm">
+        <div>
+          <p class="text-gray-400 text-xs" id="lbl-assets">Assets</p>
+          <p class="font-semibold text-green-600" id="total-assets">—</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-xs" id="lbl-liabilities">Liabilities</p>
+          <p class="font-semibold text-red-500" id="total-liabilities">—</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-xs" id="lbl-cashflow">Monthly Flow</p>
+          <p class="font-semibold" id="monthly-cashflow">—</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 -mt-2 space-y-4">
+
+    <!-- Freedom Meter -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="font-semibold text-gray-700" id="lbl-freedom">Freedom Meter</h2>
+        <span id="rat-race-badge" class="text-xs font-bold px-3 py-1 rounded-full bg-red-100 text-red-600">—</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+        <div id="freedom-bar" class="h-4 rounded-full transition-all duration-700 bg-gradient-to-r from-yellow-400 to-green-500" style="width:0%"></div>
+      </div>
+      <div class="flex justify-between text-xs text-gray-400 mt-1">
+        <span>0%</span>
+        <span id="freedom-pct" class="font-semibold text-blue-600">0%</span>
+        <span>100% 🎯</span>
+      </div>
+      <p class="text-xs text-gray-500 mt-2" id="freedom-desc"></p>
+      <!-- Milestones -->
+      <div class="flex gap-2 mt-3">
+        <div class="flex-1 text-center text-xs" id="m25">
+          <div class="w-6 h-6 rounded-full bg-gray-200 mx-auto mb-1 flex items-center justify-center">🌱</div>
+          <span class="text-gray-400">25%</span>
+        </div>
+        <div class="flex-1 text-center text-xs" id="m50">
+          <div class="w-6 h-6 rounded-full bg-gray-200 mx-auto mb-1 flex items-center justify-center">🌿</div>
+          <span class="text-gray-400">50%</span>
+        </div>
+        <div class="flex-1 text-center text-xs" id="m75">
+          <div class="w-6 h-6 rounded-full bg-gray-200 mx-auto mb-1 flex items-center justify-center">🌳</div>
+          <span class="text-gray-400">75%</span>
+        </div>
+        <div class="flex-1 text-center text-xs" id="m100">
+          <div class="w-6 h-6 rounded-full bg-gray-200 mx-auto mb-1 flex items-center justify-center">🏆</div>
+          <span class="text-gray-400">FREE!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Income vs Expense Chart -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <h2 class="font-semibold text-gray-700 mb-3" id="lbl-monthly">รายรับ vs รายจ่ายเดือนนี้</h2>
+      <canvas id="incomeExpenseChart" height="160"></canvas>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-2 gap-3">
+      <a href="transactions.html" class="bg-blue-500 text-white rounded-2xl p-4 text-center shadow-sm">
+        <i class="fas fa-plus-circle text-2xl mb-1"></i>
+        <p class="text-sm font-medium" id="lbl-add-tx">บันทึกรายการ</p>
+      </a>
+      <a href="cashflow.html" class="bg-purple-500 text-white rounded-2xl p-4 text-center shadow-sm">
+        <i class="fas fa-gamepad text-2xl mb-1"></i>
+        <p class="text-sm font-medium" id="lbl-cashflow-game">Cashflow Game</p>
+      </a>
+      <a href="assets.html" class="bg-green-500 text-white rounded-2xl p-4 text-center shadow-sm">
+        <i class="fas fa-building-columns text-2xl mb-1"></i>
+        <p class="text-sm font-medium" id="lbl-assets-link">ทรัพย์สิน/หนี้สิน</p>
+      </a>
+      <a href="goals.html" class="bg-orange-500 text-white rounded-2xl p-4 text-center shadow-sm">
+        <i class="fas fa-bullseye text-2xl mb-1"></i>
+        <p class="text-sm font-medium" id="lbl-goals-link">เป้าหมาย</p>
+      </a>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="font-semibold text-gray-700">รายการล่าสุด</h2>
+        <a href="transactions.html" class="text-blue-500 text-sm">ดูทั้งหมด →</a>
+      </div>
+      <div id="recent-transactions">
+        <div class="flex justify-center p-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50">
+    <a href="index.html" class="flex flex-col items-center text-blue-600">
+      <i class="fas fa-home text-xl"></i>
+      <span class="text-xs mt-1">หน้าหลัก</span>
+    </a>
+    <a href="transactions.html" class="flex flex-col items-center text-gray-400">
+      <i class="fas fa-list text-xl"></i>
+      <span class="text-xs mt-1">รายการ</span>
+    </a>
+    <a href="cashflow.html" class="flex flex-col items-center text-gray-400">
+      <i class="fas fa-gamepad text-xl"></i>
+      <span class="text-xs mt-1">Cashflow</span>
+    </a>
+    <a href="assets.html" class="flex flex-col items-center text-gray-400">
+      <i class="fas fa-wallet text-xl"></i>
+      <span class="text-xs mt-1">ทรัพย์สิน</span>
+    </a>
+    <a href="goals.html" class="flex flex-col items-center text-gray-400">
+      <i class="fas fa-bullseye text-xl"></i>
+      <span class="text-xs mt-1">เป้าหมาย</span>
+    </a>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
