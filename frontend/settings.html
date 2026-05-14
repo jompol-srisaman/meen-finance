@@ -4,213 +4,239 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>ตั้งค่า</title>
+  <script src="js/theme.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body { font-family: 'Segoe UI', sans-serif; }
-    .setting-row { @apply flex items-center justify-between px-4 py-3.5 bg-white; }
-    .setting-label { @apply text-sm font-medium text-gray-700; }
-    .setting-sub { @apply text-xs text-gray-400 mt-0.5; }
-    .section-title { @apply text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 pt-5 pb-2; }
+    .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 1.25rem 1rem 0.5rem; color: var(--text-sub); }
+    .row { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; background: var(--card); border-bottom: 1px solid var(--divider); }
+    .row:last-child { border-bottom: none; }
+    .row-title { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+    .row-sub { font-size: 0.75rem; color: var(--text-sub); margin-top: 0.1rem; }
+    .settings-group { border-radius: 1rem; overflow: hidden; margin: 0 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+    /* Theme Cards */
+    .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 0.75rem 1rem; }
+    .theme-card {
+      border-radius: 1rem; overflow: hidden; cursor: pointer;
+      border: 2.5px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .theme-card.selected { border-color: var(--primary); transform: scale(1.04); }
+    .theme-card:active { transform: scale(0.97); }
+    .theme-preview { height: 64px; }
+    .theme-footer { padding: 0.5rem 0.6rem; display: flex; align-items: center; justify-content: space-between; }
+    .theme-name { font-size: 0.75rem; font-weight: 600; }
+    .theme-check { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; }
+
+    /* Lang Toggle */
+    .lang-toggle { display: flex; border-radius: 0.75rem; overflow: hidden; border: 1.5px solid var(--input-border); }
+    .lang-btn { padding: 0.35rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; background: var(--card); color: var(--text-muted); }
+    .lang-btn.active { background: var(--primary); color: white; }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen pb-24">
+<body class="min-h-screen pb-24">
 
-  <header class="bg-gradient-to-r from-gray-700 to-gray-900 text-white px-4 pt-10 pb-6">
-    <h1 class="text-xl font-bold">ตั้งค่า</h1>
-    <p class="text-gray-400 text-sm mt-0.5">Meen Finance</p>
-  </header>
-
-  <main>
-
-    <!-- Profile -->
-    <p class="section-title">บัญชีผู้ใช้</p>
-    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
-      <div class="setting-row">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg">M</div>
-          <div>
-            <p class="setting-label" id="profile-name">Meen Finance</p>
-            <p class="setting-sub">Personal Account</p>
-          </div>
+  <!-- Header -->
+  <header class="app-header text-white px-4 pt-10 pb-8 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background: repeating-linear-gradient(45deg,white,white 1px,transparent 1px,transparent 10px)"></div>
+    <div class="relative">
+      <div class="flex items-center gap-3 mb-1">
+        <div id="avatar" class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-xl font-bold shadow-inner">M</div>
+        <div>
+          <p id="profile-name" class="font-bold text-lg leading-tight">Meen Finance</p>
+          <p class="text-white/60 text-xs">Personal Account</p>
         </div>
-        <button onclick="editName()" class="text-blue-500 text-sm">แก้ไข</button>
+        <button onclick="editName()" class="ml-auto bg-white/20 rounded-xl px-3 py-1.5 text-xs font-medium">แก้ไข</button>
       </div>
     </div>
+  </header>
 
-    <!-- Display -->
-    <p class="section-title">การแสดงผล</p>
-    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
+  <main class="py-2">
 
-      <div class="setting-row">
-        <div>
-          <p class="setting-label">ภาษา</p>
-          <p class="setting-sub" id="lang-sub">ไทย / Thai</p>
+    <!-- Theme Picker -->
+    <p class="section-label">ธีม & รูปแบบ UI</p>
+    <div class="theme-grid">
+
+      <!-- Sky (Default) -->
+      <div class="theme-card" id="theme-sky" onclick="applyTheme('sky')">
+        <div class="theme-preview" style="background: linear-gradient(135deg,#2563eb,#1e40af)">
+          <div style="padding:8px;display:flex;flex-direction:column;gap:4px">
+            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.8);width:60%"></div>
+            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.4);width:80%"></div>
+            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.3);width:50%"></div>
+            <div style="margin-top:4px;height:18px;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center">
+              <div style="height:3px;width:40%;border-radius:2px;background:#2563eb"></div>
+            </div>
+          </div>
         </div>
-        <div class="flex rounded-xl overflow-hidden border border-gray-200">
-          <button id="lang-th" onclick="setLang('th')" class="px-3 py-1.5 text-sm font-medium bg-blue-500 text-white">TH</button>
-          <button id="lang-en" onclick="setLang('en')" class="px-3 py-1.5 text-sm font-medium bg-white text-gray-500">EN</button>
+        <div class="theme-footer" style="background:#f8faff">
+          <span class="theme-name" style="color:#1e40af">Sky</span>
+          <span id="check-sky" class="theme-check" style="background:#2563eb">✓</span>
         </div>
       </div>
 
-      <div class="setting-row">
-        <div>
-          <p class="setting-label">สกุลเงิน</p>
-          <p class="setting-sub">Thai Baht (฿)</p>
+      <!-- Midnight -->
+      <div class="theme-card" id="theme-midnight" onclick="applyTheme('midnight')">
+        <div class="theme-preview" style="background: linear-gradient(135deg,#1e1b4b,#0f172a)">
+          <div style="padding:8px;display:flex;flex-direction:column;gap:4px">
+            <div style="height:6px;border-radius:3px;background:rgba(129,140,248,0.9);width:60%"></div>
+            <div style="height:4px;border-radius:2px;background:rgba(148,163,184,0.4);width:80%"></div>
+            <div style="height:4px;border-radius:2px;background:rgba(148,163,184,0.3);width:50%"></div>
+            <div style="margin-top:4px;height:18px;border-radius:6px;background:#1e293b;border:1px solid #334155;display:flex;align-items:center;justify-content:center">
+              <div style="height:3px;width:40%;border-radius:2px;background:#818cf8"></div>
+            </div>
+          </div>
         </div>
-        <span class="text-gray-400 text-sm font-medium bg-gray-100 rounded-lg px-3 py-1.5">THB ฿</span>
+        <div class="theme-footer" style="background:#0f172a">
+          <span class="theme-name" style="color:#e2e8f0">Midnight</span>
+          <span id="check-midnight" class="theme-check" style="background:#6366f1">✓</span>
+        </div>
       </div>
 
-      <div class="setting-row">
-        <div>
-          <p class="setting-label">ธีม</p>
-          <p class="setting-sub" id="theme-sub">สว่าง</p>
+      <!-- Emerald -->
+      <div class="theme-card" id="theme-emerald" onclick="applyTheme('emerald')">
+        <div class="theme-preview" style="background: linear-gradient(135deg,#059669,#064e3b)">
+          <div style="padding:8px;display:flex;flex-direction:column;gap:4px">
+            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.8);width:60%"></div>
+            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.4);width:80%"></div>
+            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.3);width:50%"></div>
+            <div style="margin-top:4px;height:18px;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center">
+              <div style="height:3px;width:40%;border-radius:2px;background:#059669"></div>
+            </div>
+          </div>
         </div>
-        <button onclick="toggleTheme()" id="theme-toggle" class="relative w-12 h-6 rounded-full bg-gray-300 transition-colors duration-200">
-          <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"></span>
-        </button>
+        <div class="theme-footer" style="background:#f0fdf4">
+          <span class="theme-name" style="color:#064e3b">Emerald</span>
+          <span id="check-emerald" class="theme-check" style="background:#059669">✓</span>
+        </div>
       </div>
 
+    </div>
+
+    <!-- Language -->
+    <p class="section-label">ภาษา</p>
+    <div class="settings-group">
+      <div class="row">
+        <div>
+          <p class="row-title">ภาษาที่แสดง</p>
+          <p id="lang-sub" class="row-sub">ไทย</p>
+        </div>
+        <div class="lang-toggle">
+          <button class="lang-btn" id="lang-th" onclick="setLang('th')">TH</button>
+          <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+        </div>
+      </div>
     </div>
 
     <!-- App Data -->
-    <p class="section-title">ข้อมูลแอป</p>
-    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
-
-      <div class="setting-row">
+    <p class="section-label">จัดการข้อมูล</p>
+    <div class="settings-group">
+      <div class="row">
         <div>
-          <p class="setting-label">ทดสอบการเชื่อมต่อ API</p>
-          <p class="setting-sub">ตรวจสอบว่า Google Sheets ตอบสนอง</p>
+          <p class="row-title">เพิ่มหมวดหมู่รายจ่าย</p>
+          <p class="row-sub">สำหรับ Cashflow Game</p>
         </div>
-        <button onclick="testApi()" id="test-btn" class="text-blue-500 text-sm font-medium">ทดสอบ</button>
+        <button onclick="openCategoryModal()" class="text-sm font-medium px-3 py-1.5 rounded-lg" style="background:var(--primary-light);color:var(--primary)">จัดการ</button>
       </div>
-
-      <div class="setting-row">
+      <div class="row">
         <div>
-          <p class="setting-label">เพิ่มหมวดหมู่รายจ่าย</p>
-          <p class="setting-sub">ปรับแต่งหมวดหมู่สำหรับ Cashflow</p>
+          <p class="row-title">ทดสอบการเชื่อมต่อ</p>
+          <p class="row-sub">ตรวจสอบ Google Sheets API</p>
         </div>
-        <button onclick="openCategoryModal()" class="text-blue-500 text-sm font-medium">จัดการ →</button>
+        <button onclick="testApi()" id="test-btn" class="text-sm font-medium px-3 py-1.5 rounded-lg" style="background:var(--primary-light);color:var(--primary)">ทดสอบ</button>
       </div>
-
-      <div class="setting-row">
+      <div class="row">
         <div>
-          <p class="setting-label">ล้าง Cache</p>
-          <p class="setting-sub">ล้างข้อมูลชั่วคราวใน browser</p>
+          <p class="row-title">ล้าง Cache</p>
+          <p class="row-sub">ล้างข้อมูลชั่วคราว</p>
         </div>
-        <button onclick="clearCache()" class="text-orange-500 text-sm font-medium">ล้าง</button>
+        <button onclick="clearCache()" class="text-sm font-medium px-3 py-1.5 rounded-lg bg-orange-50 text-orange-500">ล้าง</button>
       </div>
-
     </div>
 
     <!-- Links -->
-    <p class="section-title">ลิงก์</p>
-    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
-
-      <a href="https://docs.google.com/spreadsheets/d/1ZpiHavAZOm_-j1_pvJ_w_jN_A2-gPnKOPRFHwr597yc/edit" target="_blank" class="setting-row">
+    <p class="section-label">ลิงก์ด่วน</p>
+    <div class="settings-group">
+      <a href="https://docs.google.com/spreadsheets/d/1ZpiHavAZOm_-j1_pvJ_w_jN_A2-gPnKOPRFHwr597yc/edit" target="_blank" class="row" style="text-decoration:none">
         <div class="flex items-center gap-3">
-          <i class="fas fa-table text-green-500 w-5 text-center"></i>
-          <div>
-            <p class="setting-label">Google Sheets</p>
-            <p class="setting-sub">ดู/แก้ข้อมูลโดยตรง</p>
-          </div>
+          <div class="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center"><i class="fas fa-table text-green-600 text-sm"></i></div>
+          <div><p class="row-title">Google Sheets</p><p class="row-sub">ดู/แก้ข้อมูลโดยตรง</p></div>
         </div>
-        <i class="fas fa-external-link-alt text-gray-300 text-xs"></i>
+        <i class="fas fa-chevron-right text-xs" style="color:var(--text-sub)"></i>
       </a>
-
-      <a href="https://script.google.com/d/1Hzg4nWBSqvf_WQLAq1SIpycT5WSlNJWjQ0AuIQ5rrMHUk27OZRggVAhD/edit" target="_blank" class="setting-row">
+      <a href="https://script.google.com/d/1Hzg4nWBSqvf_WQLAq1SIpycT5WSlNJWjQ0AuIQ5rrMHUk27OZRggVAhD/edit" target="_blank" class="row" style="text-decoration:none">
         <div class="flex items-center gap-3">
-          <i class="fas fa-code text-blue-500 w-5 text-center"></i>
-          <div>
-            <p class="setting-label">GAS Editor</p>
-            <p class="setting-sub">แก้ไข backend script</p>
-          </div>
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--primary-light)"><i class="fas fa-code text-sm" style="color:var(--primary)"></i></div>
+          <div><p class="row-title">GAS Editor</p><p class="row-sub">แก้ไข backend script</p></div>
         </div>
-        <i class="fas fa-external-link-alt text-gray-300 text-xs"></i>
+        <i class="fas fa-chevron-right text-xs" style="color:var(--text-sub)"></i>
       </a>
-
-      <a href="https://github.com/jompol-srisaman/meen-finance" target="_blank" class="setting-row">
+      <a href="https://github.com/jompol-srisaman/meen-finance" target="_blank" class="row" style="text-decoration:none">
         <div class="flex items-center gap-3">
-          <i class="fab fa-github text-gray-700 w-5 text-center"></i>
-          <div>
-            <p class="setting-label">GitHub Repository</p>
-            <p class="setting-sub">Source code</p>
-          </div>
+          <div class="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fab fa-github text-gray-700 text-sm"></i></div>
+          <div><p class="row-title">GitHub</p><p class="row-sub">Source code</p></div>
         </div>
-        <i class="fas fa-external-link-alt text-gray-300 text-xs"></i>
+        <i class="fas fa-chevron-right text-xs" style="color:var(--text-sub)"></i>
       </a>
-
     </div>
 
     <!-- About -->
-    <p class="section-title">เกี่ยวกับ</p>
-    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
-      <div class="setting-row">
-        <p class="setting-label">เวอร์ชัน</p>
-        <span class="text-gray-400 text-sm">1.0.0</span>
-      </div>
-      <div class="setting-row">
-        <p class="setting-label">สร้างด้วย</p>
-        <span class="text-gray-400 text-sm">GAS + GitHub Pages</span>
-      </div>
-      <div class="setting-row">
-        <div>
-          <p class="setting-label">แนวคิด</p>
-          <p class="setting-sub">Robert Kiyosaki — Rich Dad Poor Dad</p>
-        </div>
-        <span class="text-2xl">📚</span>
+    <p class="section-label">เกี่ยวกับ</p>
+    <div class="settings-group">
+      <div class="row"><p class="row-title">เวอร์ชัน</p><span class="text-sm" style="color:var(--text-sub)">1.0.0</span></div>
+      <div class="row"><p class="row-title">สร้างด้วย</p><span class="text-sm" style="color:var(--text-sub)">GAS + GitHub Pages</span></div>
+      <div class="row">
+        <div><p class="row-title">แนวคิด</p><p class="row-sub">Robert Kiyosaki — Rich Dad Poor Dad</p></div>
+        <span class="text-xl">📚</span>
       </div>
     </div>
 
-    <div class="h-6"></div>
-
+    <div class="h-4"></div>
   </main>
 
-  <!-- Add Category Modal -->
-  <div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
-    <div class="bg-white rounded-t-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">เพิ่มหมวดหมู่รายจ่าย</h2>
-        <button onclick="closeCategoryModal()" class="text-gray-400 text-xl">✕</button>
+  <!-- Category Modal -->
+  <div id="category-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header"><h2>เพิ่มหมวดหมู่รายจ่าย</h2><button onclick="closeCategoryModal()">✕</button></div>
+      <div class="modal-body">
+        <p class="text-sm" style="color:var(--text-muted)">หมวดหมู่นี้จะแสดงใน Cashflow Game (Income Statement)</p>
+        <div><label class="field-label">ชื่อหมวดหมู่</label><input type="text" id="cat-name" placeholder="เช่น ค่าเช่า" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ประเภท</label><select id="cat-type" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          <option value="mortgage">ผ่อนบ้าน</option>
+          <option value="car_payment">ผ่อนรถ</option>
+          <option value="credit_card">บัตรเครดิต</option>
+          <option value="food">อาหาร</option>
+          <option value="transport">เดินทาง</option>
+          <option value="tax">ภาษี</option>
+          <option value="other">อื่นๆ</option>
+        </select></div>
+        <div><label class="field-label">งบประมาณ/เดือน (฿)</label><input type="number" id="cat-budget" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>
-      <p class="text-sm text-gray-500">หมวดหมู่นี้จะแสดงใน Cashflow Game (Income Statement)</p>
-      <input type="text" id="cat-name" placeholder="ชื่อหมวดหมู่ เช่น ค่าเช่า"
-        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
-      <select id="cat-type" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
-        <option value="mortgage">ผ่อนบ้าน (Mortgage)</option>
-        <option value="car_payment">ผ่อนรถ (Car Payment)</option>
-        <option value="credit_card">บัตรเครดิต (Credit Card)</option>
-        <option value="food">อาหาร (Food)</option>
-        <option value="transport">เดินทาง (Transport)</option>
-        <option value="tax">ภาษี (Tax)</option>
-        <option value="other">อื่นๆ (Other)</option>
-      </select>
-      <input type="number" id="cat-budget" placeholder="งบประมาณ/เดือน (฿)" inputmode="decimal"
-        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
-      <button onclick="saveCategory()" class="w-full bg-gray-800 text-white rounded-xl py-3 font-bold">บันทึก</button>
+      <div class="modal-footer"><button onclick="saveCategory()" style="background-color:var(--primary)">บันทึก</button></div>
     </div>
   </div>
 
   <!-- Edit Name Modal -->
-  <div id="name-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
-    <div class="bg-white rounded-t-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">แก้ไขชื่อ</h2>
-        <button onclick="document.getElementById('name-modal').classList.add('hidden')" class="text-gray-400 text-xl">✕</button>
+  <div id="name-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header"><h2>แก้ไขชื่อ</h2><button onclick="document.getElementById('name-modal').classList.add('hidden')">✕</button></div>
+      <div class="modal-body">
+        <div><label class="field-label">ชื่อของคุณ</label><input type="text" id="new-name" placeholder="ชื่อ" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>
-      <input type="text" id="new-name" placeholder="ชื่อของคุณ"
-        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
-      <button onclick="saveName()" class="w-full bg-gray-800 text-white rounded-xl py-3 font-bold">บันทึก</button>
+      <div class="modal-footer"><button onclick="saveName()" style="background-color:var(--primary)">บันทึก</button></div>
     </div>
   </div>
 
-  <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50">
-    <a href="index.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
-    <a href="transactions.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
-    <a href="cashflow.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-gamepad text-xl"></i><span class="text-xs mt-1">Cashflow</span></a>
-    <a href="assets.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-wallet text-xl"></i><span class="text-xs mt-1">ทรัพย์สิน</span></a>
-    <a href="settings.html" class="flex flex-col items-center text-gray-700"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1 font-semibold">ตั้งค่า</span></a>
+  <nav class="app-nav fixed bottom-0 left-0 right-0 border-t flex justify-around py-2 z-50">
+    <a href="index.html" class="flex flex-col items-center"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
+    <a href="transactions.html" class="flex flex-col items-center"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
+    <a href="cashflow.html" class="flex flex-col items-center"><i class="fas fa-gamepad text-xl"></i><span class="text-xs mt-1">Cashflow</span></a>
+    <a href="goals.html" class="flex flex-col items-center"><i class="fas fa-bullseye text-xl"></i><span class="text-xs mt-1">เป้าหมาย</span></a>
+    <a href="settings.html" class="active flex flex-col items-center"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1">ตั้งค่า</span></a>
   </nav>
 
   <script src="js/config.js"></script>

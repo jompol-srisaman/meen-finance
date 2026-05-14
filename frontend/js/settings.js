@@ -3,21 +3,21 @@
 document.addEventListener('DOMContentLoaded', () => {
   loadProfileName();
   applyLangButtons();
-  applyTheme();
+  highlightTheme(localStorage.getItem('theme') || 'sky');
 });
 
-// ── Profile Name ──────────────────────────────────────────────
+// ── Profile ───────────────────────────────────────────────────
 
 function loadProfileName() {
   const name = localStorage.getItem('profileName') || 'Meen Finance';
   document.getElementById('profile-name').textContent = name;
-  document.querySelector('#profile-name').closest('.flex').querySelector('.w-10').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('avatar').textContent = name.charAt(0).toUpperCase();
 }
 
 function editName() {
   document.getElementById('new-name').value = localStorage.getItem('profileName') || '';
   document.getElementById('name-modal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('new-name').focus(), 100);
+  setTimeout(() => document.getElementById('new-name').focus(), 150);
 }
 
 function saveName() {
@@ -26,76 +26,72 @@ function saveName() {
   localStorage.setItem('profileName', name);
   document.getElementById('name-modal').classList.add('hidden');
   loadProfileName();
+  showToast('บันทึกชื่อแล้ว ✅');
+}
+
+// ── Theme ─────────────────────────────────────────────────────
+
+function applyTheme(theme) {
+  localStorage.setItem('theme', theme);
+  document.documentElement.setAttribute('data-theme', theme);
+  highlightTheme(theme);
+  showToast({ sky: 'ธีม Sky ✅', midnight: 'ธีม Midnight ✅', emerald: 'ธีม Emerald ✅' }[theme] || '✅');
+}
+
+function highlightTheme(active) {
+  ['sky', 'midnight', 'emerald'].forEach(t => {
+    const card = document.getElementById('theme-' + t);
+    const check = document.getElementById('check-' + t);
+    if (!card) return;
+    if (t === active) {
+      card.classList.add('selected');
+      check.style.opacity = '1';
+    } else {
+      card.classList.remove('selected');
+      check.style.opacity = '0.25';
+    }
+  });
 }
 
 // ── Language ──────────────────────────────────────────────────
 
 function applyLangButtons() {
   const lang = localStorage.getItem('lang') || 'th';
-  if (lang === 'th') {
-    document.getElementById('lang-th').className = 'px-3 py-1.5 text-sm font-medium bg-blue-500 text-white';
-    document.getElementById('lang-en').className = 'px-3 py-1.5 text-sm font-medium bg-white text-gray-500';
-    document.getElementById('lang-sub').textContent = 'ไทย / Thai';
-  } else {
-    document.getElementById('lang-en').className = 'px-3 py-1.5 text-sm font-medium bg-blue-500 text-white';
-    document.getElementById('lang-th').className = 'px-3 py-1.5 text-sm font-medium bg-white text-gray-500';
-    document.getElementById('lang-sub').textContent = 'English';
-  }
+  document.getElementById('lang-th').classList.toggle('active', lang === 'th');
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('lang-sub').textContent = lang === 'th' ? 'ไทย' : 'English';
 }
 
 function setLang(lang) {
   localStorage.setItem('lang', lang);
   applyLangButtons();
-}
-
-// ── Theme ─────────────────────────────────────────────────────
-
-function applyTheme() {
-  const dark = localStorage.getItem('theme') === 'dark';
-  const toggle = document.getElementById('theme-toggle');
-  const knob = document.getElementById('theme-knob');
-  const sub = document.getElementById('theme-sub');
-  if (dark) {
-    toggle.classList.replace('bg-gray-300', 'bg-blue-500');
-    knob.style.transform = 'translateX(24px)';
-    sub.textContent = 'มืด (Dark)';
-    document.body.classList.add('dark-mode');
-  } else {
-    toggle.classList.replace('bg-blue-500', 'bg-gray-300');
-    knob.style.transform = 'translateX(0)';
-    sub.textContent = 'สว่าง (Light)';
-    document.body.classList.remove('dark-mode');
-  }
-}
-
-function toggleTheme() {
-  const dark = localStorage.getItem('theme') === 'dark';
-  localStorage.setItem('theme', dark ? 'light' : 'dark');
-  applyTheme();
+  showToast(lang === 'th' ? 'เปลี่ยนเป็นภาษาไทย' : 'Changed to English');
 }
 
 // ── API Test ──────────────────────────────────────────────────
 
 async function testApi() {
   const btn = document.getElementById('test-btn');
-  btn.textContent = 'กำลังทดสอบ...';
+  btn.textContent = '...';
   btn.disabled = true;
   try {
-    const start = Date.now();
-    const data = await API.getSettings();
-    const ms = Date.now() - start;
-    btn.textContent = `✅ OK (${ms}ms)`;
-    btn.className = 'text-green-500 text-sm font-medium';
-    setTimeout(() => {
-      btn.textContent = 'ทดสอบ';
-      btn.className = 'text-blue-500 text-sm font-medium';
-      btn.disabled = false;
-    }, 3000);
+    const t0 = Date.now();
+    await API.getSettings();
+    const ms = Date.now() - t0;
+    btn.textContent = `✅ ${ms}ms`;
+    btn.style.color = '#16a34a';
+    btn.style.background = '#dcfce7';
   } catch (e) {
-    btn.textContent = '❌ ไม่ได้';
-    btn.className = 'text-red-500 text-sm font-medium';
-    btn.disabled = false;
+    btn.textContent = '❌ Error';
+    btn.style.color = '#dc2626';
+    btn.style.background = '#fee2e2';
   }
+  btn.disabled = false;
+  setTimeout(() => {
+    btn.textContent = 'ทดสอบ';
+    btn.style.color = '';
+    btn.style.background = '';
+  }, 3000);
 }
 
 // ── Cache ─────────────────────────────────────────────────────
@@ -113,7 +109,7 @@ function clearCache() {
 
 function openCategoryModal() {
   document.getElementById('category-modal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('cat-name').focus(), 100);
+  setTimeout(() => document.getElementById('cat-name').focus(), 150);
 }
 
 function closeCategoryModal() {
@@ -125,11 +121,7 @@ async function saveCategory() {
   const budget = parseFloat(document.getElementById('cat-budget').value);
   if (!name || !budget) { showToast('กรุณากรอกข้อมูลให้ครบ'); return; }
   try {
-    await API.addExpenseCategory({
-      name,
-      type: document.getElementById('cat-type').value,
-      monthly_budget: budget
-    });
+    await API.addExpenseCategory({ name, type: document.getElementById('cat-type').value, monthly_budget: budget });
     closeCategoryModal();
     document.getElementById('cat-name').value = '';
     document.getElementById('cat-budget').value = '';
@@ -142,9 +134,12 @@ async function saveCategory() {
 // ── Toast ─────────────────────────────────────────────────────
 
 function showToast(msg) {
-  const toast = document.createElement('div');
-  toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-5 py-2.5 rounded-full z-50 shadow-lg';
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2500);
+  const old = document.getElementById('toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'toast';
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;font-size:0.85rem;padding:0.6rem 1.25rem;border-radius:99px;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.2);white-space:nowrap';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
 }

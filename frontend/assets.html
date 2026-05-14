@@ -4,138 +4,126 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>ทรัพย์สิน & หนี้สิน</title>
+  <script src="js/theme.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>body { font-family: 'Segoe UI', sans-serif; }</style>
 </head>
-<body class="bg-gray-50 min-h-screen pb-20">
+<body class="min-h-screen pb-20">
 
-  <header class="bg-gradient-to-r from-green-600 to-green-800 text-white px-4 pt-10 pb-6">
+  <header class="app-header text-white px-4 pt-10 pb-4">
     <div class="flex justify-between items-center">
       <h1 class="text-xl font-bold">ทรัพย์สิน & หนี้สิน</h1>
-      <button onclick="toggleLang()" class="text-green-200 text-sm border border-green-400 rounded-full px-3 py-1">TH/EN</button>
+      <button onclick="toggleLang()" class="text-white/60 text-sm border border-white/30 rounded-full px-3 py-1">TH/EN</button>
     </div>
-    <!-- Net Worth Summary -->
     <div class="grid grid-cols-3 gap-2 mt-3">
-      <div class="bg-green-700 rounded-xl p-2 text-center">
-        <p class="text-green-200 text-xs">ทรัพย์สิน</p>
+      <div class="bg-white/20 rounded-xl p-2 text-center">
+        <p class="text-white/70 text-xs">ทรัพย์สิน</p>
         <p id="hdr-assets" class="font-bold text-sm mt-0.5">—</p>
       </div>
-      <div class="bg-green-700 rounded-xl p-2 text-center">
-        <p class="text-green-200 text-xs">หนี้สิน</p>
+      <div class="bg-white/20 rounded-xl p-2 text-center">
+        <p class="text-white/70 text-xs">หนี้สิน</p>
         <p id="hdr-liabilities" class="font-bold text-sm mt-0.5">—</p>
       </div>
       <div class="bg-white rounded-xl p-2 text-center">
-        <p class="text-gray-500 text-xs">Net Worth</p>
-        <p id="hdr-networth" class="font-bold text-sm mt-0.5 text-green-700">—</p>
+        <p class="text-xs" style="color:var(--text-muted)">Net Worth</p>
+        <p id="hdr-networth" class="font-bold text-sm mt-0.5 text-green-600">—</p>
       </div>
     </div>
   </header>
 
-  <!-- Tabs -->
-  <div class="flex bg-white border-b border-gray-200 sticky top-0 z-10">
-    <button onclick="switchTab('assets')" id="tab-assets" class="flex-1 py-3 text-sm font-medium text-green-600 border-b-2 border-green-500">ทรัพย์สิน</button>
-    <button onclick="switchTab('liabilities')" id="tab-liabilities" class="flex-1 py-3 text-sm font-medium text-gray-400">หนี้สิน</button>
-    <button onclick="switchTab('income')" id="tab-income" class="flex-1 py-3 text-sm font-medium text-gray-400">รายได้ประจำ</button>
+  <div class="flex sticky top-0 z-10 border-b" style="background:var(--card);border-color:var(--divider)">
+    <button onclick="switchTab('assets')" id="tab-assets" class="flex-1 py-3 text-sm font-medium" style="color:var(--primary);border-bottom:2px solid var(--primary)">ทรัพย์สิน</button>
+    <button onclick="switchTab('liabilities')" id="tab-liabilities" class="flex-1 py-3 text-sm font-medium" style="color:var(--text-muted)">หนี้สิน</button>
+    <button onclick="switchTab('income')" id="tab-income" class="flex-1 py-3 text-sm font-medium" style="color:var(--text-muted)">รายได้ประจำ</button>
   </div>
 
   <main class="px-4 py-4">
-    <div id="tab-content-assets" class="tab-content">
-      <button onclick="openAssetModal()" class="w-full bg-green-500 text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 mb-4">
+    <div id="tab-content-assets">
+      <button onclick="openAssetModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 mb-4" style="background-color:#22c55e">
         <i class="fas fa-plus"></i> เพิ่มทรัพย์สิน
       </button>
-      <div id="assets-list">
-        <div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div></div>
-      </div>
+      <div id="assets-list"><div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div></div></div>
     </div>
-
-    <div id="tab-content-liabilities" class="tab-content hidden">
-      <button onclick="openLiabilityModal()" class="w-full bg-red-500 text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 mb-4">
+    <div id="tab-content-liabilities" class="hidden">
+      <button onclick="openLiabilityModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 mb-4 bg-red-500">
         <i class="fas fa-plus"></i> เพิ่มหนี้สิน
       </button>
-      <div id="liabilities-list">
-        <div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div></div>
-      </div>
+      <div id="liabilities-list"><div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div></div></div>
     </div>
-
-    <div id="tab-content-income" class="tab-content hidden">
-      <button onclick="openIncomeModal()" class="w-full bg-blue-500 text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 mb-4">
+    <div id="tab-content-income" class="hidden">
+      <button onclick="openIncomeModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 mb-4" style="background-color:var(--primary)">
         <i class="fas fa-plus"></i> เพิ่มรายได้ประจำ
       </button>
-      <div id="income-list">
-        <div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>
-      </div>
+      <div id="income-list"><div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color:var(--primary)"></div></div></div>
     </div>
   </main>
 
   <!-- Asset Modal -->
-  <div id="asset-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
-    <div class="bg-white rounded-t-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">เพิ่มทรัพย์สิน</h2>
-        <button onclick="closeModals()" class="text-gray-400 text-xl">✕</button>
+  <div id="asset-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header"><h2>เพิ่มทรัพย์สิน</h2><button onclick="closeModals()">✕</button></div>
+      <div class="modal-body">
+        <div><label class="field-label">ชื่อทรัพย์สิน</label><input type="text" id="a-name" placeholder="เช่น บ้านหลังที่ 1" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ประเภท</label><select id="a-category" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          <option value="savings">เงินออม / เงินสด</option>
+          <option value="stocks">หุ้น / กองทุน</option>
+          <option value="real_estate">อสังหาริมทรัพย์</option>
+          <option value="business">ธุรกิจ</option>
+          <option value="other">อื่นๆ</option>
+        </select></div>
+        <div><label class="field-label">มูลค่า (฿)</label><input type="number" id="a-value" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">กระแสเงินสดรายเดือน (฿) — ถ้ามี</label><input type="number" id="a-cashflow" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>
-      <input type="text" id="a-name" placeholder="ชื่อทรัพย์สิน เช่น บ้านหลังที่ 1" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400">
-      <select id="a-category" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400">
-        <option value="savings">เงินออม / เงินสด</option>
-        <option value="stocks">หุ้น / กองทุน</option>
-        <option value="real_estate">อสังหาริมทรัพย์</option>
-        <option value="business">ธุรกิจ</option>
-        <option value="other">อื่นๆ</option>
-      </select>
-      <input type="number" id="a-value" placeholder="มูลค่า (฿)" inputmode="decimal" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400">
-      <input type="number" id="a-cashflow" placeholder="กระแสเงินสดรายเดือน (฿)" inputmode="decimal" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400">
-      <button onclick="saveAsset()" class="w-full bg-green-500 text-white rounded-xl py-3 font-bold">บันทึก</button>
+      <div class="modal-footer"><button onclick="saveAsset()" style="background-color:#22c55e">บันทึก</button></div>
     </div>
   </div>
 
   <!-- Liability Modal -->
-  <div id="liability-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
-    <div class="bg-white rounded-t-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">เพิ่มหนี้สิน</h2>
-        <button onclick="closeModals()" class="text-gray-400 text-xl">✕</button>
+  <div id="liability-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header"><h2>เพิ่มหนี้สิน</h2><button onclick="closeModals()">✕</button></div>
+      <div class="modal-body">
+        <div><label class="field-label">ชื่อหนี้</label><input type="text" id="l-name" placeholder="เช่น สินเชื่อบ้าน" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ประเภท</label><select id="l-category" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          <option value="mortgage">สินเชื่อบ้าน</option>
+          <option value="car_loan">สินเชื่อรถ</option>
+          <option value="credit_card">บัตรเครดิต</option>
+          <option value="student_loan">สินเชื่อการศึกษา</option>
+          <option value="other">อื่นๆ</option>
+        </select></div>
+        <div><label class="field-label">ยอดหนี้คงค้าง (฿)</label><input type="number" id="l-balance" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ยอดผ่อนต่อเดือน (฿)</label><input type="number" id="l-payment" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">อัตราดอกเบี้ย (%/ปี)</label><input type="number" id="l-rate" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>
-      <input type="text" id="l-name" placeholder="ชื่อหนี้ เช่น สินเชื่อบ้าน" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400">
-      <select id="l-category" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400">
-        <option value="mortgage">สินเชื่อบ้าน</option>
-        <option value="car_loan">สินเชื่อรถ</option>
-        <option value="credit_card">บัตรเครดิต</option>
-        <option value="student_loan">สินเชื่อการศึกษา</option>
-        <option value="other">อื่นๆ</option>
-      </select>
-      <input type="number" id="l-balance" placeholder="ยอดหนี้คงค้าง (฿)" inputmode="decimal" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400">
-      <input type="number" id="l-payment" placeholder="ยอดผ่อนต่อเดือน (฿)" inputmode="decimal" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400">
-      <input type="number" id="l-rate" placeholder="อัตราดอกเบี้ย (%)" inputmode="decimal" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400">
-      <button onclick="saveLiability()" class="w-full bg-red-500 text-white rounded-xl py-3 font-bold">บันทึก</button>
+      <div class="modal-footer"><button onclick="saveLiability()" class="bg-red-500">บันทึก</button></div>
     </div>
   </div>
 
   <!-- Income Source Modal -->
-  <div id="income-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
-    <div class="bg-white rounded-t-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">เพิ่มรายได้ประจำ</h2>
-        <button onclick="closeModals()" class="text-gray-400 text-xl">✕</button>
+  <div id="income-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header"><h2>เพิ่มรายได้ประจำ</h2><button onclick="closeModals()">✕</button></div>
+      <div class="modal-body">
+        <div><label class="field-label">ชื่อรายได้</label><input type="text" id="i-name" placeholder="เช่น เงินเดือน บริษัท ABC" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ประเภท</label><select id="i-type" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          <option value="salary">เงินเดือน (Salary)</option>
+          <option value="passive">Passive Income (เช่า, ปันผล)</option>
+          <option value="portfolio">Portfolio Income (หุ้น, กองทุน)</option>
+        </select></div>
+        <div><label class="field-label">จำนวน/เดือน (฿)</label><input type="number" id="i-amount" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>
-      <input type="text" id="i-name" placeholder="ชื่อรายได้ เช่น เงินเดือน" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
-      <select id="i-type" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
-        <option value="salary">เงินเดือน (Salary)</option>
-        <option value="passive">Passive Income (เช่า, ปันผล)</option>
-        <option value="portfolio">Portfolio Income (หุ้น, กองทุน)</option>
-      </select>
-      <input type="number" id="i-amount" placeholder="จำนวน/เดือน (฿)" inputmode="decimal" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
-      <button onclick="saveIncomeSource()" class="w-full bg-blue-500 text-white rounded-xl py-3 font-bold">บันทึก</button>
+      <div class="modal-footer"><button onclick="saveIncomeSource()" style="background-color:var(--primary)">บันทึก</button></div>
     </div>
   </div>
 
-  <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50">
-    <a href="index.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
-    <a href="transactions.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
-    <a href="cashflow.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-gamepad text-xl"></i><span class="text-xs mt-1">Cashflow</span></a>
-    <a href="assets.html" class="flex flex-col items-center text-green-600"><i class="fas fa-wallet text-xl"></i><span class="text-xs mt-1">ทรัพย์สิน</span></a>
-    <a href="settings.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1">ตั้งค่า</span></a>
+  <nav class="app-nav fixed bottom-0 left-0 right-0 border-t flex justify-around py-2 z-50">
+    <a href="index.html" class="flex flex-col items-center"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
+    <a href="transactions.html" class="flex flex-col items-center"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
+    <a href="cashflow.html" class="flex flex-col items-center"><i class="fas fa-gamepad text-xl"></i><span class="text-xs mt-1">Cashflow</span></a>
+    <a href="assets.html" class="active flex flex-col items-center"><i class="fas fa-wallet text-xl"></i><span class="text-xs mt-1">ทรัพย์สิน</span></a>
+    <a href="settings.html" class="flex flex-col items-center"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1">ตั้งค่า</span></a>
   </nav>
 
   <script src="js/config.js"></script>
