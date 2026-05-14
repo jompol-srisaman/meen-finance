@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ตั้งค่า</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .setting-row { @apply flex items-center justify-between px-4 py-3.5 bg-white; }
+    .setting-label { @apply text-sm font-medium text-gray-700; }
+    .setting-sub { @apply text-xs text-gray-400 mt-0.5; }
+    .section-title { @apply text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 pt-5 pb-2; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen pb-24">
+
+  <header class="bg-gradient-to-r from-gray-700 to-gray-900 text-white px-4 pt-10 pb-6">
+    <h1 class="text-xl font-bold">ตั้งค่า</h1>
+    <p class="text-gray-400 text-sm mt-0.5">Meen Finance</p>
+  </header>
+
+  <main>
+
+    <!-- Profile -->
+    <p class="section-title">บัญชีผู้ใช้</p>
+    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
+      <div class="setting-row">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg">M</div>
+          <div>
+            <p class="setting-label" id="profile-name">Meen Finance</p>
+            <p class="setting-sub">Personal Account</p>
+          </div>
+        </div>
+        <button onclick="editName()" class="text-blue-500 text-sm">แก้ไข</button>
+      </div>
+    </div>
+
+    <!-- Display -->
+    <p class="section-title">การแสดงผล</p>
+    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
+
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">ภาษา</p>
+          <p class="setting-sub" id="lang-sub">ไทย / Thai</p>
+        </div>
+        <div class="flex rounded-xl overflow-hidden border border-gray-200">
+          <button id="lang-th" onclick="setLang('th')" class="px-3 py-1.5 text-sm font-medium bg-blue-500 text-white">TH</button>
+          <button id="lang-en" onclick="setLang('en')" class="px-3 py-1.5 text-sm font-medium bg-white text-gray-500">EN</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">สกุลเงิน</p>
+          <p class="setting-sub">Thai Baht (฿)</p>
+        </div>
+        <span class="text-gray-400 text-sm font-medium bg-gray-100 rounded-lg px-3 py-1.5">THB ฿</span>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">ธีม</p>
+          <p class="setting-sub" id="theme-sub">สว่าง</p>
+        </div>
+        <button onclick="toggleTheme()" id="theme-toggle" class="relative w-12 h-6 rounded-full bg-gray-300 transition-colors duration-200">
+          <span id="theme-knob" class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"></span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- App Data -->
+    <p class="section-title">ข้อมูลแอป</p>
+    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
+
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">ทดสอบการเชื่อมต่อ API</p>
+          <p class="setting-sub">ตรวจสอบว่า Google Sheets ตอบสนอง</p>
+        </div>
+        <button onclick="testApi()" id="test-btn" class="text-blue-500 text-sm font-medium">ทดสอบ</button>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">เพิ่มหมวดหมู่รายจ่าย</p>
+          <p class="setting-sub">ปรับแต่งหมวดหมู่สำหรับ Cashflow</p>
+        </div>
+        <button onclick="openCategoryModal()" class="text-blue-500 text-sm font-medium">จัดการ →</button>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">ล้าง Cache</p>
+          <p class="setting-sub">ล้างข้อมูลชั่วคราวใน browser</p>
+        </div>
+        <button onclick="clearCache()" class="text-orange-500 text-sm font-medium">ล้าง</button>
+      </div>
+
+    </div>
+
+    <!-- Links -->
+    <p class="section-title">ลิงก์</p>
+    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
+
+      <a href="https://docs.google.com/spreadsheets/d/1ZpiHavAZOm_-j1_pvJ_w_jN_A2-gPnKOPRFHwr597yc/edit" target="_blank" class="setting-row">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-table text-green-500 w-5 text-center"></i>
+          <div>
+            <p class="setting-label">Google Sheets</p>
+            <p class="setting-sub">ดู/แก้ข้อมูลโดยตรง</p>
+          </div>
+        </div>
+        <i class="fas fa-external-link-alt text-gray-300 text-xs"></i>
+      </a>
+
+      <a href="https://script.google.com/d/1Hzg4nWBSqvf_WQLAq1SIpycT5WSlNJWjQ0AuIQ5rrMHUk27OZRggVAhD/edit" target="_blank" class="setting-row">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-code text-blue-500 w-5 text-center"></i>
+          <div>
+            <p class="setting-label">GAS Editor</p>
+            <p class="setting-sub">แก้ไข backend script</p>
+          </div>
+        </div>
+        <i class="fas fa-external-link-alt text-gray-300 text-xs"></i>
+      </a>
+
+      <a href="https://github.com/jompol-srisaman/meen-finance" target="_blank" class="setting-row">
+        <div class="flex items-center gap-3">
+          <i class="fab fa-github text-gray-700 w-5 text-center"></i>
+          <div>
+            <p class="setting-label">GitHub Repository</p>
+            <p class="setting-sub">Source code</p>
+          </div>
+        </div>
+        <i class="fas fa-external-link-alt text-gray-300 text-xs"></i>
+      </a>
+
+    </div>
+
+    <!-- About -->
+    <p class="section-title">เกี่ยวกับ</p>
+    <div class="divide-y divide-gray-100 rounded-2xl overflow-hidden mx-4 shadow-sm">
+      <div class="setting-row">
+        <p class="setting-label">เวอร์ชัน</p>
+        <span class="text-gray-400 text-sm">1.0.0</span>
+      </div>
+      <div class="setting-row">
+        <p class="setting-label">สร้างด้วย</p>
+        <span class="text-gray-400 text-sm">GAS + GitHub Pages</span>
+      </div>
+      <div class="setting-row">
+        <div>
+          <p class="setting-label">แนวคิด</p>
+          <p class="setting-sub">Robert Kiyosaki — Rich Dad Poor Dad</p>
+        </div>
+        <span class="text-2xl">📚</span>
+      </div>
+    </div>
+
+    <div class="h-6"></div>
+
+  </main>
+
+  <!-- Add Category Modal -->
+  <div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
+    <div class="bg-white rounded-t-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold">เพิ่มหมวดหมู่รายจ่าย</h2>
+        <button onclick="closeCategoryModal()" class="text-gray-400 text-xl">✕</button>
+      </div>
+      <p class="text-sm text-gray-500">หมวดหมู่นี้จะแสดงใน Cashflow Game (Income Statement)</p>
+      <input type="text" id="cat-name" placeholder="ชื่อหมวดหมู่ เช่น ค่าเช่า"
+        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
+      <select id="cat-type" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
+        <option value="mortgage">ผ่อนบ้าน (Mortgage)</option>
+        <option value="car_payment">ผ่อนรถ (Car Payment)</option>
+        <option value="credit_card">บัตรเครดิต (Credit Card)</option>
+        <option value="food">อาหาร (Food)</option>
+        <option value="transport">เดินทาง (Transport)</option>
+        <option value="tax">ภาษี (Tax)</option>
+        <option value="other">อื่นๆ (Other)</option>
+      </select>
+      <input type="number" id="cat-budget" placeholder="งบประมาณ/เดือน (฿)" inputmode="decimal"
+        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
+      <button onclick="saveCategory()" class="w-full bg-gray-800 text-white rounded-xl py-3 font-bold">บันทึก</button>
+    </div>
+  </div>
+
+  <!-- Edit Name Modal -->
+  <div id="name-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
+    <div class="bg-white rounded-t-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold">แก้ไขชื่อ</h2>
+        <button onclick="document.getElementById('name-modal').classList.add('hidden')" class="text-gray-400 text-xl">✕</button>
+      </div>
+      <input type="text" id="new-name" placeholder="ชื่อของคุณ"
+        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-400">
+      <button onclick="saveName()" class="w-full bg-gray-800 text-white rounded-xl py-3 font-bold">บันทึก</button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50">
+    <a href="index.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
+    <a href="transactions.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
+    <a href="cashflow.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-gamepad text-xl"></i><span class="text-xs mt-1">Cashflow</span></a>
+    <a href="assets.html" class="flex flex-col items-center text-gray-400"><i class="fas fa-wallet text-xl"></i><span class="text-xs mt-1">ทรัพย์สิน</span></a>
+    <a href="settings.html" class="flex flex-col items-center text-gray-700"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1 font-semibold">ตั้งค่า</span></a>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>
