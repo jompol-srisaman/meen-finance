@@ -1,133 +1,63 @@
-// Code.gs — doGet/doPost router
+// Code.gs — doGet router (all ops via GET to avoid GAS redirect POST-body drop)
 
 function doGet(e) {
-  return handleRequest(e, null);
-}
-
-function doPost(e) {
-  let body = {};
-  try {
-    if (e.postData && e.postData.contents) {
-      body = JSON.parse(e.postData.contents);
-    }
-  } catch (_) {}
-  return handleRequest(e, body);
-}
-
-function handleRequest(e, body) {
   const params = e.parameter || {};
-  const action = params.action || (body && body.action) || '';
-  const key = params.key || (body && body.key) || '';
+  const action = params.action || '';
+  const key = params.key || '';
 
-  // Special case: initSheets is allowed without auth during first-time setup
+  // Parse optional data param (used by write operations)
+  let body = {};
+  if (params.data) {
+    try { body = JSON.parse(params.data); } catch (_) {}
+  }
+
   if (action !== 'initSheets' && !validateApiKey(key)) {
-    return jsonResponse({ error: 'Unauthorized' }, 401);
+    return jsonResponse({ error: 'Unauthorized' });
   }
 
   try {
     let result;
     switch (action) {
-      // Transactions
-      case 'getTransactions':
-        result = getTransactions(params.month, params.year);
-        break;
-      case 'addTransaction':
-        result = addTransaction(body);
-        break;
-
-      // Assets
-      case 'getAssets':
-        result = getAssets();
-        break;
-      case 'addAsset':
-        result = addAsset(body);
-        break;
-      case 'updateAsset':
-        result = updateAsset(body);
-        break;
-      case 'deleteAsset':
-        result = deleteAsset(body.id);
-        break;
-
-      // Liabilities
-      case 'getLiabilities':
-        result = getLiabilities();
-        break;
-      case 'addLiability':
-        result = addLiability(body);
-        break;
-      case 'updateLiability':
-        result = updateLiability(body);
-        break;
-      case 'deleteLiability':
-        result = deleteLiability(body.id);
-        break;
-
-      // Income Sources
-      case 'getIncomeSources':
-        result = getIncomeSources();
-        break;
-      case 'addIncomeSource':
-        result = addIncomeSource(body);
-        break;
-      case 'updateIncomeSource':
-        result = updateIncomeSource(body);
-        break;
-
-      // Expense Categories
-      case 'getExpenseCategories':
-        result = getExpenseCategories();
-        break;
-      case 'addExpenseCategory':
-        result = addExpenseCategory(body);
-        break;
-
-      // Goals
-      case 'getGoals':
-        result = getGoals();
-        break;
-      case 'addGoal':
-        result = addGoal(body);
-        break;
-      case 'updateGoal':
-        result = updateGoal(body);
-        break;
-
-      // Cashflow Game
-      case 'getIncomeStatement':
-        result = getIncomeStatement(params.month, params.year);
-        break;
-      case 'getBalanceSheet':
-        result = getBalanceSheet();
-        break;
-      case 'getFreedomMeter':
-        result = getFreedomMeter();
-        break;
-
-      // Settings
-      case 'getSettings':
-        result = getSettings();
-        break;
-
-      // Setup
-      case 'initSheets':
-        createSheets();
-        result = { success: true, message: 'Sheets initialized' };
-        break;
-
-      default:
-        return jsonResponse({ error: 'Unknown action: ' + action }, 400);
+      case 'getTransactions':      result = getTransactions(params.month, params.year); break;
+      case 'addTransaction':       result = addTransaction(body); break;
+      case 'getAssets':            result = getAssets(); break;
+      case 'addAsset':             result = addAsset(body); break;
+      case 'updateAsset':          result = updateAsset(body); break;
+      case 'deleteAsset':          result = deleteAsset(body.id); break;
+      case 'getLiabilities':       result = getLiabilities(); break;
+      case 'addLiability':         result = addLiability(body); break;
+      case 'updateLiability':      result = updateLiability(body); break;
+      case 'deleteLiability':      result = deleteLiability(body.id); break;
+      case 'getIncomeSources':     result = getIncomeSources(); break;
+      case 'addIncomeSource':      result = addIncomeSource(body); break;
+      case 'updateIncomeSource':   result = updateIncomeSource(body); break;
+      case 'deleteIncomeSource':   result = deleteIncomeSource(body.id); break;
+      case 'getExpenseCategories': result = getExpenseCategories(); break;
+      case 'addExpenseCategory':   result = addExpenseCategory(body); break;
+      case 'deleteExpenseCategory':result = deleteExpenseCategory(body.id); break;
+      case 'getGoals':             result = getGoals(); break;
+      case 'addGoal':              result = addGoal(body); break;
+      case 'updateGoal':           result = updateGoal(body); break;
+      case 'getIncomeStatement':   result = getIncomeStatement(params.month, params.year); break;
+      case 'getBalanceSheet':      result = getBalanceSheet(); break;
+      case 'getFreedomMeter':      result = getFreedomMeter(); break;
+      case 'getSettings':          result = getSettings(); break;
+      case 'initSheets':           createSheets(); result = { success: true }; break;
+      default: return jsonResponse({ error: 'Unknown action: ' + action });
     }
-
-    return jsonResponse(result, 200);
+    return jsonResponse(result);
   } catch (err) {
-    return jsonResponse({ error: err.message, stack: err.stack }, 500);
+    return jsonResponse({ error: err.message });
   }
 }
 
-function jsonResponse(data, statusCode) {
-  const output = ContentService
+// Keep doPost as fallback
+function doPost(e) {
+  return doGet(e);
+}
+
+function jsonResponse(data) {
+  return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-  return output;
 }

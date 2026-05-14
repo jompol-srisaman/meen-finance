@@ -10,15 +10,13 @@ async function apiGet(action, params = {}) {
   return res.json();
 }
 
+// GAS Web App drops POST body after redirect — use GET with encoded data param
 async function apiPost(action, data = {}) {
   const url = new URL(GAS_URL);
   url.searchParams.set('action', action);
   url.searchParams.set('key', API_KEY);
-  const res = await fetch(url.toString(), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...data, action, key: API_KEY })
-  });
+  url.searchParams.set('data', JSON.stringify(data));
+  const res = await fetch(url.toString());
   if (!res.ok) throw new Error('API error: ' + res.status);
   return res.json();
 }
@@ -40,6 +38,8 @@ const API = {
   updateIncomeSource: (data) => apiPost('updateIncomeSource', data),
   getExpenseCategories: () => apiGet('getExpenseCategories'),
   addExpenseCategory: (data) => apiPost('addExpenseCategory', data),
+  deleteExpenseCategory: (id) => apiPost('deleteExpenseCategory', { id }),
+  deleteIncomeSource: (id) => apiPost('deleteIncomeSource', { id }),
   getGoals: () => apiGet('getGoals'),
   addGoal: (data) => apiPost('addGoal', data),
   updateGoal: (data) => apiPost('updateGoal', data),

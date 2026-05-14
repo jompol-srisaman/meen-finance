@@ -10,204 +10,193 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body { font-family: 'Segoe UI', sans-serif; }
-    .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 1.25rem 1rem 0.5rem; color: var(--text-sub); }
-    .row { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; background: var(--card); border-bottom: 1px solid var(--divider); }
-    .row:last-child { border-bottom: none; }
-    .row-title { font-size: 0.9rem; font-weight: 500; color: var(--text); }
-    .row-sub { font-size: 0.75rem; color: var(--text-sub); margin-top: 0.1rem; }
-    .settings-group { border-radius: 1rem; overflow: hidden; margin: 0 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .sec-label { font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:1.25rem 1rem 0.5rem;color:var(--text-sub); }
+    .s-row { display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;background:var(--card);border-bottom:1px solid var(--divider); }
+    .s-row:last-child { border-bottom:none; }
+    .s-title { font-size:0.875rem;font-weight:500;color:var(--text); }
+    .s-sub { font-size:0.72rem;color:var(--text-sub);margin-top:0.1rem; }
+    .s-group { border-radius:1rem;overflow:hidden;margin:0 1rem;box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    .chip-btn { font-size:0.75rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:0.5rem;cursor:pointer;transition:all .15s; }
 
-    /* Theme Cards */
-    .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 0.75rem 1rem; }
-    .theme-card {
-      border-radius: 1rem; overflow: hidden; cursor: pointer;
-      border: 2.5px solid transparent;
-      transition: transform 0.15s, border-color 0.15s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .theme-card.selected { border-color: var(--primary); transform: scale(1.04); }
-    .theme-card:active { transform: scale(0.97); }
-    .theme-preview { height: 64px; }
-    .theme-footer { padding: 0.5rem 0.6rem; display: flex; align-items: center; justify-content: space-between; }
-    .theme-name { font-size: 0.75rem; font-weight: 600; }
-    .theme-check { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; }
+    /* Theme cards */
+    .theme-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;padding:0.75rem 1rem; }
+    .theme-card { border-radius:1rem;overflow:hidden;cursor:pointer;border:2.5px solid transparent;transition:transform .15s,border-color .15s;box-shadow:0 2px 8px rgba(0,0,0,.1); }
+    .theme-card.selected { border-color:var(--primary);transform:scale(1.04); }
+    .theme-preview { height:60px; }
+    .theme-footer { padding:0.45rem 0.6rem;display:flex;align-items:center;justify-content:space-between; }
+    .theme-name { font-size:0.72rem;font-weight:700; }
+    .theme-dot { width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:white; }
 
-    /* Lang Toggle */
-    .lang-toggle { display: flex; border-radius: 0.75rem; overflow: hidden; border: 1.5px solid var(--input-border); }
-    .lang-btn { padding: 0.35rem 0.85rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; background: var(--card); color: var(--text-muted); }
-    .lang-btn.active { background: var(--primary); color: white; }
+    /* Lang toggle */
+    .lang-row { display:flex;border-radius:0.75rem;overflow:hidden;border:1.5px solid var(--input-border); }
+    .lang-btn { padding:0.35rem 0.85rem;font-size:0.8rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--text-muted); }
+    .lang-btn.active { background:var(--primary);color:white; }
+
+    /* List items */
+    .list-item { display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-bottom:1px solid var(--divider);background:var(--card); }
+    .list-item:last-child { border-bottom:none; }
+    .del-btn { width:28px;height:28px;border-radius:8px;background:#fef2f2;color:#ef4444;display:flex;align-items:center;justify-content:center;font-size:0.75rem;cursor:pointer;flex-shrink:0; }
   </style>
 </head>
 <body class="min-h-screen pb-24">
 
   <!-- Header -->
   <header class="app-header text-white px-4 pt-10 pb-8 relative overflow-hidden">
-    <div class="absolute inset-0 opacity-10" style="background: repeating-linear-gradient(45deg,white,white 1px,transparent 1px,transparent 10px)"></div>
-    <div class="relative">
-      <div class="flex items-center gap-3 mb-1">
-        <div id="avatar" class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-xl font-bold shadow-inner">M</div>
-        <div>
-          <p id="profile-name" class="font-bold text-lg leading-tight">Meen Finance</p>
-          <p class="text-white/60 text-xs">Personal Account</p>
-        </div>
-        <button onclick="editName()" class="ml-auto bg-white/20 rounded-xl px-3 py-1.5 text-xs font-medium">แก้ไข</button>
+    <div class="absolute inset-0 opacity-10" style="background:repeating-linear-gradient(45deg,white,white 1px,transparent 1px,transparent 10px)"></div>
+    <div class="relative flex items-center gap-3">
+      <div id="avatar" class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-xl font-bold">M</div>
+      <div class="flex-1">
+        <p id="profile-name" class="font-bold text-lg leading-tight">Meen Finance</p>
+        <p class="text-white/60 text-xs">Personal Account</p>
       </div>
+      <button onclick="editName()" class="bg-white/20 rounded-xl px-3 py-1.5 text-xs font-medium">แก้ไข</button>
     </div>
   </header>
 
   <main class="py-2">
 
-    <!-- Theme Picker -->
-    <p class="section-label">ธีม & รูปแบบ UI</p>
+    <!-- Theme -->
+    <p class="sec-label">ธีม & รูปแบบ</p>
     <div class="theme-grid">
-
-      <!-- Sky (Default) -->
       <div class="theme-card" id="theme-sky" onclick="applyTheme('sky')">
-        <div class="theme-preview" style="background: linear-gradient(135deg,#2563eb,#1e40af)">
-          <div style="padding:8px;display:flex;flex-direction:column;gap:4px">
-            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.8);width:60%"></div>
-            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.4);width:80%"></div>
-            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.3);width:50%"></div>
-            <div style="margin-top:4px;height:18px;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center">
-              <div style="height:3px;width:40%;border-radius:2px;background:#2563eb"></div>
-            </div>
+        <div class="theme-preview" style="background:linear-gradient(135deg,#2563eb,#1e40af)">
+          <div style="padding:7px;display:flex;flex-direction:column;gap:3px">
+            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.8);width:55%"></div>
+            <div style="height:3px;border-radius:2px;background:rgba(255,255,255,.4);width:80%"></div>
+            <div style="height:3px;border-radius:2px;background:rgba(255,255,255,.3);width:60%"></div>
+            <div style="margin-top:3px;height:16px;border-radius:5px;background:white;display:flex;align-items:center;padding:0 6px"><div style="height:3px;width:45%;border-radius:2px;background:#2563eb"></div></div>
           </div>
         </div>
         <div class="theme-footer" style="background:#f8faff">
           <span class="theme-name" style="color:#1e40af">Sky</span>
-          <span id="check-sky" class="theme-check" style="background:#2563eb">✓</span>
+          <span id="check-sky" class="theme-dot" style="background:#2563eb">✓</span>
         </div>
       </div>
-
-      <!-- Midnight -->
       <div class="theme-card" id="theme-midnight" onclick="applyTheme('midnight')">
-        <div class="theme-preview" style="background: linear-gradient(135deg,#1e1b4b,#0f172a)">
-          <div style="padding:8px;display:flex;flex-direction:column;gap:4px">
-            <div style="height:6px;border-radius:3px;background:rgba(129,140,248,0.9);width:60%"></div>
-            <div style="height:4px;border-radius:2px;background:rgba(148,163,184,0.4);width:80%"></div>
-            <div style="height:4px;border-radius:2px;background:rgba(148,163,184,0.3);width:50%"></div>
-            <div style="margin-top:4px;height:18px;border-radius:6px;background:#1e293b;border:1px solid #334155;display:flex;align-items:center;justify-content:center">
-              <div style="height:3px;width:40%;border-radius:2px;background:#818cf8"></div>
-            </div>
+        <div class="theme-preview" style="background:linear-gradient(135deg,#1e1b4b,#0f172a)">
+          <div style="padding:7px;display:flex;flex-direction:column;gap:3px">
+            <div style="height:6px;border-radius:3px;background:rgba(129,140,248,.9);width:55%"></div>
+            <div style="height:3px;border-radius:2px;background:rgba(148,163,184,.4);width:80%"></div>
+            <div style="height:3px;border-radius:2px;background:rgba(148,163,184,.3);width:60%"></div>
+            <div style="margin-top:3px;height:16px;border-radius:5px;background:#1e293b;border:1px solid #334155;display:flex;align-items:center;padding:0 6px"><div style="height:3px;width:45%;border-radius:2px;background:#818cf8"></div></div>
           </div>
         </div>
         <div class="theme-footer" style="background:#0f172a">
           <span class="theme-name" style="color:#e2e8f0">Midnight</span>
-          <span id="check-midnight" class="theme-check" style="background:#6366f1">✓</span>
+          <span id="check-midnight" class="theme-dot" style="background:#6366f1">✓</span>
         </div>
       </div>
-
-      <!-- Emerald -->
       <div class="theme-card" id="theme-emerald" onclick="applyTheme('emerald')">
-        <div class="theme-preview" style="background: linear-gradient(135deg,#059669,#064e3b)">
-          <div style="padding:8px;display:flex;flex-direction:column;gap:4px">
-            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.8);width:60%"></div>
-            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.4);width:80%"></div>
-            <div style="height:4px;border-radius:2px;background:rgba(255,255,255,0.3);width:50%"></div>
-            <div style="margin-top:4px;height:18px;border-radius:6px;background:white;display:flex;align-items:center;justify-content:center">
-              <div style="height:3px;width:40%;border-radius:2px;background:#059669"></div>
-            </div>
+        <div class="theme-preview" style="background:linear-gradient(135deg,#059669,#064e3b)">
+          <div style="padding:7px;display:flex;flex-direction:column;gap:3px">
+            <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.8);width:55%"></div>
+            <div style="height:3px;border-radius:2px;background:rgba(255,255,255,.4);width:80%"></div>
+            <div style="height:3px;border-radius:2px;background:rgba(255,255,255,.3);width:60%"></div>
+            <div style="margin-top:3px;height:16px;border-radius:5px;background:white;display:flex;align-items:center;padding:0 6px"><div style="height:3px;width:45%;border-radius:2px;background:#059669"></div></div>
           </div>
         </div>
         <div class="theme-footer" style="background:#f0fdf4">
           <span class="theme-name" style="color:#064e3b">Emerald</span>
-          <span id="check-emerald" class="theme-check" style="background:#059669">✓</span>
+          <span id="check-emerald" class="theme-dot" style="background:#059669">✓</span>
         </div>
       </div>
-
     </div>
 
     <!-- Language -->
-    <p class="section-label">ภาษา</p>
-    <div class="settings-group">
-      <div class="row">
-        <div>
-          <p class="row-title">ภาษาที่แสดง</p>
-          <p id="lang-sub" class="row-sub">ไทย</p>
-        </div>
-        <div class="lang-toggle">
+    <p class="sec-label">ภาษา</p>
+    <div class="s-group">
+      <div class="s-row">
+        <div><p class="s-title">ภาษาที่แสดง</p><p id="lang-sub" class="s-sub">ไทย</p></div>
+        <div class="lang-row">
           <button class="lang-btn" id="lang-th" onclick="setLang('th')">TH</button>
           <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
         </div>
       </div>
     </div>
 
-    <!-- App Data -->
-    <p class="section-label">จัดการข้อมูล</p>
-    <div class="settings-group">
-      <div class="row">
-        <div>
-          <p class="row-title">เพิ่มหมวดหมู่รายจ่าย</p>
-          <p class="row-sub">สำหรับ Cashflow Game</p>
-        </div>
-        <button onclick="openCategoryModal()" class="text-sm font-medium px-3 py-1.5 rounded-lg" style="background:var(--primary-light);color:var(--primary)">จัดการ</button>
+    <!-- Expense Categories -->
+    <p class="sec-label">หมวดหมู่รายจ่าย <span id="exp-count" class="text-xs normal-case font-normal opacity-60"></span></p>
+    <div class="s-group">
+      <div id="expense-cat-list">
+        <div class="list-item"><span class="s-sub">กำลังโหลด...</span></div>
       </div>
-      <div class="row">
-        <div>
-          <p class="row-title">ทดสอบการเชื่อมต่อ</p>
-          <p class="row-sub">ตรวจสอบ Google Sheets API</p>
-        </div>
-        <button onclick="testApi()" id="test-btn" class="text-sm font-medium px-3 py-1.5 rounded-lg" style="background:var(--primary-light);color:var(--primary)">ทดสอบ</button>
+      <div class="s-row">
+        <div><p class="s-title">เพิ่มหมวดหมู่รายจ่าย</p><p class="s-sub">ใช้ใน Cashflow Game</p></div>
+        <button onclick="openModal('expense-cat')" class="chip-btn" style="background:var(--primary-light);color:var(--primary)">+ เพิ่ม</button>
       </div>
-      <div class="row">
-        <div>
-          <p class="row-title">ล้าง Cache</p>
-          <p class="row-sub">ล้างข้อมูลชั่วคราว</p>
-        </div>
-        <button onclick="clearCache()" class="text-sm font-medium px-3 py-1.5 rounded-lg bg-orange-50 text-orange-500">ล้าง</button>
+    </div>
+
+    <!-- Income Sources -->
+    <p class="sec-label">รายได้ประจำ <span id="income-count" class="text-xs normal-case font-normal opacity-60"></span></p>
+    <div class="s-group">
+      <div id="income-source-list">
+        <div class="list-item"><span class="s-sub">กำลังโหลด...</span></div>
+      </div>
+      <div class="s-row">
+        <div><p class="s-title">เพิ่มรายได้ประจำ</p><p class="s-sub">Salary / Passive / Portfolio</p></div>
+        <button onclick="openModal('income-src')" class="chip-btn" style="background:var(--primary-light);color:var(--primary)">+ เพิ่ม</button>
+      </div>
+    </div>
+
+    <!-- System -->
+    <p class="sec-label">ระบบ</p>
+    <div class="s-group">
+      <div class="s-row">
+        <div><p class="s-title">ทดสอบการเชื่อมต่อ API</p><p class="s-sub">ตรวจสอบ Google Sheets</p></div>
+        <button onclick="testApi()" id="test-btn" class="chip-btn" style="background:var(--primary-light);color:var(--primary)">ทดสอบ</button>
+      </div>
+      <div class="s-row">
+        <div><p class="s-title">ล้าง Cache</p><p class="s-sub">ล้างข้อมูลชั่วคราว</p></div>
+        <button onclick="clearCache()" class="chip-btn bg-orange-50 text-orange-500">ล้าง</button>
       </div>
     </div>
 
     <!-- Links -->
-    <p class="section-label">ลิงก์ด่วน</p>
-    <div class="settings-group">
-      <a href="https://docs.google.com/spreadsheets/d/1ZpiHavAZOm_-j1_pvJ_w_jN_A2-gPnKOPRFHwr597yc/edit" target="_blank" class="row" style="text-decoration:none">
+    <p class="sec-label">ลิงก์ด่วน</p>
+    <div class="s-group">
+      <a href="https://docs.google.com/spreadsheets/d/1ZpiHavAZOm_-j1_pvJ_w_jN_A2-gPnKOPRFHwr597yc/edit" target="_blank" class="s-row" style="text-decoration:none">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center"><i class="fas fa-table text-green-600 text-sm"></i></div>
-          <div><p class="row-title">Google Sheets</p><p class="row-sub">ดู/แก้ข้อมูลโดยตรง</p></div>
+          <div><p class="s-title">Google Sheets</p><p class="s-sub">ดูข้อมูลโดยตรง</p></div>
         </div>
         <i class="fas fa-chevron-right text-xs" style="color:var(--text-sub)"></i>
       </a>
-      <a href="https://script.google.com/d/1Hzg4nWBSqvf_WQLAq1SIpycT5WSlNJWjQ0AuIQ5rrMHUk27OZRggVAhD/edit" target="_blank" class="row" style="text-decoration:none">
+      <a href="https://script.google.com/d/1Hzg4nWBSqvf_WQLAq1SIpycT5WSlNJWjQ0AuIQ5rrMHUk27OZRggVAhD/edit" target="_blank" class="s-row" style="text-decoration:none">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--primary-light)"><i class="fas fa-code text-sm" style="color:var(--primary)"></i></div>
-          <div><p class="row-title">GAS Editor</p><p class="row-sub">แก้ไข backend script</p></div>
+          <div><p class="s-title">GAS Editor</p><p class="s-sub">แก้ไข backend</p></div>
         </div>
         <i class="fas fa-chevron-right text-xs" style="color:var(--text-sub)"></i>
       </a>
-      <a href="https://github.com/jompol-srisaman/meen-finance" target="_blank" class="row" style="text-decoration:none">
+      <a href="https://github.com/jompol-srisaman/meen-finance" target="_blank" class="s-row" style="text-decoration:none">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center"><i class="fab fa-github text-gray-700 text-sm"></i></div>
-          <div><p class="row-title">GitHub</p><p class="row-sub">Source code</p></div>
+          <div><p class="s-title">GitHub</p><p class="s-sub">Source code</p></div>
         </div>
         <i class="fas fa-chevron-right text-xs" style="color:var(--text-sub)"></i>
       </a>
     </div>
 
     <!-- About -->
-    <p class="section-label">เกี่ยวกับ</p>
-    <div class="settings-group">
-      <div class="row"><p class="row-title">เวอร์ชัน</p><span class="text-sm" style="color:var(--text-sub)">1.0.0</span></div>
-      <div class="row"><p class="row-title">สร้างด้วย</p><span class="text-sm" style="color:var(--text-sub)">GAS + GitHub Pages</span></div>
-      <div class="row">
-        <div><p class="row-title">แนวคิด</p><p class="row-sub">Robert Kiyosaki — Rich Dad Poor Dad</p></div>
-        <span class="text-xl">📚</span>
-      </div>
+    <p class="sec-label">เกี่ยวกับ</p>
+    <div class="s-group">
+      <div class="s-row"><p class="s-title">เวอร์ชัน</p><span class="text-sm" style="color:var(--text-sub)">1.0.0</span></div>
+      <div class="s-row"><p class="s-title">สร้างด้วย</p><span class="text-sm" style="color:var(--text-sub)">GAS + GitHub Pages</span></div>
+      <div class="s-row"><div><p class="s-title">แนวคิด</p><p class="s-sub">Robert Kiyosaki — Rich Dad Poor Dad</p></div><span class="text-xl">📚</span></div>
     </div>
 
     <div class="h-4"></div>
   </main>
 
-  <!-- Category Modal -->
-  <div id="category-modal" class="modal-sheet hidden">
+  <!-- Expense Category Modal -->
+  <div id="modal-expense-cat" class="modal-sheet hidden">
     <div class="modal-inner">
-      <div class="modal-header"><h2>เพิ่มหมวดหมู่รายจ่าย</h2><button onclick="closeCategoryModal()">✕</button></div>
+      <div class="modal-header"><h2>เพิ่มหมวดหมู่รายจ่าย</h2><button onclick="closeAllModals()">✕</button></div>
       <div class="modal-body">
-        <p class="text-sm" style="color:var(--text-muted)">หมวดหมู่นี้จะแสดงใน Cashflow Game (Income Statement)</p>
-        <div><label class="field-label">ชื่อหมวดหมู่</label><input type="text" id="cat-name" placeholder="เช่น ค่าเช่า" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ชื่อหมวดหมู่</label><input type="text" id="cat-name" placeholder="เช่น ค่าเช่า, ค่าอาหาร" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
         <div><label class="field-label">ประเภท</label><select id="cat-type" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
-          <option value="mortgage">ผ่อนบ้าน</option>
-          <option value="car_payment">ผ่อนรถ</option>
+          <option value="mortgage">ผ่อนบ้าน (Mortgage)</option>
+          <option value="car_payment">ผ่อนรถ (Car Payment)</option>
           <option value="credit_card">บัตรเครดิต</option>
           <option value="food">อาหาร</option>
           <option value="transport">เดินทาง</option>
@@ -216,14 +205,31 @@
         </select></div>
         <div><label class="field-label">งบประมาณ/เดือน (฿)</label><input type="number" id="cat-budget" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>
-      <div class="modal-footer"><button onclick="saveCategory()" style="background-color:var(--primary)">บันทึก</button></div>
+      <div class="modal-footer"><button onclick="saveExpenseCat()" style="background-color:var(--primary)">บันทึก</button></div>
+    </div>
+  </div>
+
+  <!-- Income Source Modal -->
+  <div id="modal-income-src" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header"><h2>เพิ่มรายได้ประจำ</h2><button onclick="closeAllModals()">✕</button></div>
+      <div class="modal-body">
+        <div><label class="field-label">ชื่อรายได้</label><input type="text" id="inc-name" placeholder="เช่น เงินเดือน ABC" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ประเภท</label><select id="inc-type" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          <option value="salary">เงินเดือน (Salary)</option>
+          <option value="passive">Passive Income (เช่า/ปันผล)</option>
+          <option value="portfolio">Portfolio (หุ้น/กองทุน)</option>
+        </select></div>
+        <div><label class="field-label">จำนวน/เดือน (฿)</label><input type="number" id="inc-amount" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+      </div>
+      <div class="modal-footer"><button onclick="saveIncomeSrc()" style="background-color:var(--primary)">บันทึก</button></div>
     </div>
   </div>
 
   <!-- Edit Name Modal -->
-  <div id="name-modal" class="modal-sheet hidden">
+  <div id="modal-name" class="modal-sheet hidden">
     <div class="modal-inner">
-      <div class="modal-header"><h2>แก้ไขชื่อ</h2><button onclick="document.getElementById('name-modal').classList.add('hidden')">✕</button></div>
+      <div class="modal-header"><h2>แก้ไขชื่อ</h2><button onclick="closeAllModals()">✕</button></div>
       <div class="modal-body">
         <div><label class="field-label">ชื่อของคุณ</label><input type="text" id="new-name" placeholder="ชื่อ" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>

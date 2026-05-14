@@ -148,6 +148,14 @@ function addExpenseCategory(data) {
   return { success: true, id: id };
 }
 
+function deleteExpenseCategory(id) {
+  return deleteRowById(getSpreadsheet().getSheetByName('Expense_Categories'), id);
+}
+
+function deleteIncomeSource(id) {
+  return deleteRowById(getSpreadsheet().getSheetByName('Income_Sources'), id);
+}
+
 // ── Goals ─────────────────────────────────────────────────────
 
 function getGoals() {

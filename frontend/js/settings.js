@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProfileName();
   applyLangButtons();
   highlightTheme(localStorage.getItem('theme') || 'sky');
+  loadExpenseCategories();
+  loadIncomeSources();
 });
 
 // ── Profile ───────────────────────────────────────────────────
@@ -16,7 +18,7 @@ function loadProfileName() {
 
 function editName() {
   document.getElementById('new-name').value = localStorage.getItem('profileName') || '';
-  document.getElementById('name-modal').classList.remove('hidden');
+  openModal('name');
   setTimeout(() => document.getElementById('new-name').focus(), 150);
 }
 
@@ -24,7 +26,7 @@ function saveName() {
   const name = document.getElementById('new-name').value.trim();
   if (!name) return;
   localStorage.setItem('profileName', name);
-  document.getElementById('name-modal').classList.add('hidden');
+  closeAllModals();
   loadProfileName();
   showToast('บันทึกชื่อแล้ว ✅');
 }
@@ -68,6 +70,135 @@ function setLang(lang) {
   showToast(lang === 'th' ? 'เปลี่ยนเป็นภาษาไทย' : 'Changed to English');
 }
 
+// ── Expense Categories ────────────────────────────────────────
+
+async function loadExpenseCategories() {
+  const list = document.getElementById('expense-cat-list');
+  const count = document.getElementById('exp-count');
+  try {
+    const cats = await API.getExpenseCategories();
+    count.textContent = cats.length ? `(${cats.length})` : '';
+    if (!cats.length) {
+      list.innerHTML = '<div class="list-item"><span class="s-sub" style="color:var(--text-sub)">ยังไม่มีหมวดหมู่</span></div>';
+      return;
+    }
+    const typeLabel = { mortgage:'ผ่อนบ้าน', car_payment:'ผ่อนรถ', credit_card:'บัตรเครดิต', food:'อาหาร', transport:'เดินทาง', tax:'ภาษี', other:'อื่นๆ' };
+    list.innerHTML = cats.map(c => `
+      <div class="list-item" id="cat-row-${c.id}">
+        <div>
+          <p class="s-title">${c.name}</p>
+          <p class="s-sub">${typeLabel[c.type] || c.type} · ฿${Number(c.monthly_budget || 0).toLocaleString()}/เดือน</p>
+        </div>
+        <button class="del-btn" onclick="deleteExpenseCat('${c.id}')"><i class="fas fa-trash-alt"></i></button>
+      </div>`).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="list-item"><span class="s-sub text-red-400">โหลดไม่สำเร็จ</span></div>';
+  }
+}
+
+async function deleteExpenseCat(id) {
+  if (!confirm('ลบหมวดหมู่นี้?')) return;
+  try {
+    await API.deleteExpenseCategory(id);
+    document.getElementById('cat-row-' + id)?.remove();
+    showToast('ลบแล้ว ✅');
+    loadExpenseCategories();
+  } catch (e) {
+    showToast('ลบไม่สำเร็จ ลองใหม่');
+  }
+}
+
+async function saveExpenseCat() {
+  const name = document.getElementById('cat-name').value.trim();
+  const budget = parseFloat(document.getElementById('cat-budget').value);
+  if (!name || isNaN(budget)) { showToast('กรุณากรอกข้อมูลให้ครบ'); return; }
+  const btn = document.querySelector('#modal-expense-cat .modal-footer button');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  try {
+    await API.addExpenseCategory({ name, type: document.getElementById('cat-type').value, monthly_budget: budget });
+    closeAllModals();
+    document.getElementById('cat-name').value = '';
+    document.getElementById('cat-budget').value = '';
+    showToast('เพิ่มหมวดหมู่แล้ว ✅');
+    loadExpenseCategories();
+  } catch (e) {
+    showToast('เกิดข้อผิดพลาด ลองใหม่');
+  }
+  btn.disabled = false; btn.textContent = 'บันทึก';
+}
+
+// ── Income Sources ────────────────────────────────────────────
+
+async function loadIncomeSources() {
+  const list = document.getElementById('income-source-list');
+  const count = document.getElementById('income-count');
+  try {
+    const sources = await API.getIncomeSources();
+    count.textContent = sources.length ? `(${sources.length})` : '';
+    if (!sources.length) {
+      list.innerHTML = '<div class="list-item"><span class="s-sub" style="color:var(--text-sub)">ยังไม่มีรายได้</span></div>';
+      return;
+    }
+    const typeLabel = { salary:'เงินเดือน', passive:'Passive Income', portfolio:'Portfolio' };
+    list.innerHTML = sources.map(s => `
+      <div class="list-item" id="inc-row-${s.id}">
+        <div>
+          <p class="s-title">${s.name}</p>
+          <p class="s-sub">${typeLabel[s.type] || s.type} · ฿${Number(s.monthly_amount || 0).toLocaleString()}/เดือน</p>
+        </div>
+        <button class="del-btn" onclick="deleteIncSrc('${s.id}')"><i class="fas fa-trash-alt"></i></button>
+      </div>`).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="list-item"><span class="s-sub text-red-400">โหลดไม่สำเร็จ</span></div>';
+  }
+}
+
+async function deleteIncSrc(id) {
+  if (!confirm('ลบรายได้นี้?')) return;
+  try {
+    await API.deleteIncomeSource(id);
+    document.getElementById('inc-row-' + id)?.remove();
+    showToast('ลบแล้ว ✅');
+    loadIncomeSources();
+  } catch (e) {
+    showToast('ลบไม่สำเร็จ ลองใหม่');
+  }
+}
+
+async function saveIncomeSrc() {
+  const name = document.getElementById('inc-name').value.trim();
+  const amount = parseFloat(document.getElementById('inc-amount').value);
+  if (!name || isNaN(amount)) { showToast('กรุณากรอกข้อมูลให้ครบ'); return; }
+  const btn = document.querySelector('#modal-income-src .modal-footer button');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  try {
+    await API.addIncomeSource({ name, type: document.getElementById('inc-type').value, monthly_amount: amount, active: true });
+    closeAllModals();
+    document.getElementById('inc-name').value = '';
+    document.getElementById('inc-amount').value = '';
+    showToast('เพิ่มรายได้แล้ว ✅');
+    loadIncomeSources();
+  } catch (e) {
+    showToast('เกิดข้อผิดพลาด ลองใหม่');
+  }
+  btn.disabled = false; btn.textContent = 'บันทึก';
+}
+
+// ── Modals ────────────────────────────────────────────────────
+
+function openModal(name) {
+  document.getElementById('modal-' + name)?.classList.remove('hidden');
+}
+
+function closeAllModals() {
+  document.querySelectorAll('.modal-sheet').forEach(m => m.classList.add('hidden'));
+}
+
+// Close modal on backdrop click
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-sheet')) closeAllModals();
+});
+
 // ── API Test ──────────────────────────────────────────────────
 
 async function testApi() {
@@ -103,32 +234,6 @@ function clearCache() {
   localStorage.clear();
   keep.forEach(k => { if (saved[k]) localStorage.setItem(k, saved[k]); });
   showToast('ล้าง Cache แล้ว ✅');
-}
-
-// ── Category Modal ────────────────────────────────────────────
-
-function openCategoryModal() {
-  document.getElementById('category-modal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('cat-name').focus(), 150);
-}
-
-function closeCategoryModal() {
-  document.getElementById('category-modal').classList.add('hidden');
-}
-
-async function saveCategory() {
-  const name = document.getElementById('cat-name').value.trim();
-  const budget = parseFloat(document.getElementById('cat-budget').value);
-  if (!name || !budget) { showToast('กรุณากรอกข้อมูลให้ครบ'); return; }
-  try {
-    await API.addExpenseCategory({ name, type: document.getElementById('cat-type').value, monthly_budget: budget });
-    closeCategoryModal();
-    document.getElementById('cat-name').value = '';
-    document.getElementById('cat-budget').value = '';
-    showToast('เพิ่มหมวดหมู่แล้ว ✅');
-  } catch (e) {
-    showToast('เกิดข้อผิดพลาด ลองใหม่');
-  }
 }
 
 // ── Toast ─────────────────────────────────────────────────────
