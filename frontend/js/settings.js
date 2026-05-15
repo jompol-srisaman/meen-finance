@@ -236,59 +236,6 @@ function clearCache() {
   showToast('ล้าง Cache แล้ว ✅');
 }
 
-// ── Thai Tax Calculator ───────────────────────────────────────
-
-function calcTax() {
-  const income = parseFloat(document.getElementById('tax-income').value) || 0;
-  if (income <= 0) {
-    document.getElementById('tax-result').classList.add('hidden');
-    return;
-  }
-
-  const lifeIns = Math.min(parseFloat(document.getElementById('tax-life-ins').value) || 0, 100000);
-  const fund = parseFloat(document.getElementById('tax-fund').value) || 0;
-  const maxFund = income * 0.30;
-
-  // Standard deductions
-  const empDeduction = Math.min(income * 0.50, 100000);
-  const personalAllowance = 60000;
-  const socialSecurity = 9000;
-  const lifeInsDeduction = lifeIns;
-  const fundDeduction = Math.min(fund, maxFund, 500000);
-
-  const totalDeductions = empDeduction + personalAllowance + socialSecurity + lifeInsDeduction + fundDeduction;
-  const netIncome = income - empDeduction;
-  const taxableIncome = Math.max(0, income - totalDeductions);
-
-  // Thai progressive tax rates 2025
-  const brackets = [
-    { limit: 150000,  rate: 0.00 },
-    { limit: 300000,  rate: 0.05 },
-    { limit: 500000,  rate: 0.10 },
-    { limit: 750000,  rate: 0.15 },
-    { limit: 1000000, rate: 0.20 },
-    { limit: 2000000, rate: 0.25 },
-    { limit: 5000000, rate: 0.30 },
-    { limit: Infinity, rate: 0.35 }
-  ];
-
-  let tax = 0;
-  let prev = 0;
-  for (const b of brackets) {
-    if (taxableIncome <= prev) break;
-    const chunk = Math.min(taxableIncome - prev, b.limit - prev);
-    tax += chunk * b.rate;
-    prev = b.limit;
-  }
-
-  document.getElementById('tr-net').textContent = formatMoney(netIncome);
-  document.getElementById('tr-allow').textContent = formatMoney(totalDeductions - empDeduction);
-  document.getElementById('tr-taxable').textContent = formatMoney(taxableIncome);
-  document.getElementById('tr-tax').textContent = formatMoney(tax);
-  document.getElementById('tr-monthly').textContent = formatMoney(tax / 12) + '/เดือน';
-  document.getElementById('tax-result').classList.remove('hidden');
-}
-
 // ── Toast ─────────────────────────────────────────────────────
 
 function showToast(msg) {

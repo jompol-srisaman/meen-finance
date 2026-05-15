@@ -20,11 +20,14 @@
   <!-- Header -->
   <header class="app-header text-white px-4 pt-10 pb-16 relative">
     <div class="flex justify-between items-start">
-      <div>
-        <p class="text-sm opacity-70" id="greeting"></p>
-        <h1 class="text-2xl font-bold mt-1">Meen Finance</h1>
+      <div class="flex items-center gap-3">
+        <button onclick="openDrawer()" class="hamburger-btn mt-1"><i class="fas fa-bars"></i></button>
+        <div>
+          <p class="text-sm opacity-70" id="greeting"></p>
+          <h1 class="text-2xl font-bold mt-0.5">Meen Finance</h1>
+        </div>
       </div>
-      <button onclick="toggleLang()" class="text-sm opacity-60 border border-white/30 rounded-full px-3 py-1">TH/EN</button>
+      <button onclick="toggleLang()" class="text-sm opacity-60 border border-white/30 rounded-full px-3 py-1 mt-1">TH/EN</button>
     </div>
     <!-- Net Worth card overlapping -->
     <div class="app-card rounded-2xl shadow-lg p-4 mt-4" style="color:var(--text)">
@@ -148,5 +151,6 @@
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 </html>

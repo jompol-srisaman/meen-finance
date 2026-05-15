@@ -153,3 +153,50 @@ label.field-label {
   display: block;
   margin-bottom: 0.25rem;
 }
+
+/* ── Hamburger button ── */
+.hamburger-btn {
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.18);
+  border: none;
+  border-radius: 0.6rem;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Drawer nav links ── */
+.drawer-group-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1rem 1.25rem 0.35rem;
+  color: var(--text-sub);
+  margin: 0;
+}
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  transition: background .12s;
+}
+.drawer-link:hover { background: var(--primary-light); }
+.drawer-link-active {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+  font-weight: 600;
+}
+.drawer-link-icon {
+  width: 20px;
+  text-align: center;
+  color: inherit;
+}

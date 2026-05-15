@@ -174,13 +174,19 @@ function addGoal(data) {
     parseFloat(data.current_amount) || 0,
     data.target_date || '',
     data.type || 'savings',
-    data.status || 'active'
+    data.status || 'active',
+    data.wallet || 'personal',
+    data.notes || ''
   ]);
   return { success: true, id: id };
 }
 
 function updateGoal(data) {
   return updateRowById(getSpreadsheet().getSheetByName('Goals'), data);
+}
+
+function deleteGoal(id) {
+  return deleteRowById(getSpreadsheet().getSheetByName('Goals'), id);
 }
 
 // ── Insurance ─────────────────────────────────────────────────

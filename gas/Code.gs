@@ -37,6 +37,7 @@ function doGet(e) {
       case 'getGoals':              result = getGoals(); break;
       case 'addGoal':              result = addGoal(body); break;
       case 'updateGoal':           result = updateGoal(body); break;
+      case 'deleteGoal':           result = deleteGoal(body.id); break;
       case 'getInsurance':          result = getInsurance(); break;
       case 'addInsurance':          result = addInsurance(body); break;
       case 'updateInsurance':       result = updateInsurance(body); break;

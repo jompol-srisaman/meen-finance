@@ -44,6 +44,7 @@
   <header class="app-header text-white px-4 pt-10 pb-8 relative overflow-hidden">
     <div class="absolute inset-0 opacity-10" style="background:repeating-linear-gradient(45deg,white,white 1px,transparent 1px,transparent 10px)"></div>
     <div class="relative flex items-center gap-3">
+      <button onclick="openDrawer()" class="hamburger-btn flex-shrink-0"><i class="fas fa-bars"></i></button>
       <div id="avatar" class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-xl font-bold">M</div>
       <div class="flex-1">
         <p id="profile-name" class="font-bold text-lg leading-tight">Meen Finance</p>
@@ -177,33 +178,16 @@
       </a>
     </div>
 
-    <!-- Thai Tax Calculator -->
-    <p class="sec-label">คำนวณภาษีเงินได้บุคคลธรรมดา (ไทย)</p>
+    <!-- Tax Calculator Link -->
+    <p class="sec-label">เครื่องมือ</p>
     <div class="s-group">
-      <div class="s-row" style="flex-direction:column;align-items:flex-start;gap:0.75rem">
-        <div class="w-full">
-          <p class="s-sub mb-1">รายได้จากเงินเดือน/ปี (฿)</p>
-          <input type="number" id="tax-income" inputmode="decimal" placeholder="เช่น 540000" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none" oninput="calcTax()">
+      <a href="tax.html" class="s-row" style="text-decoration:none">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--primary-light)"><i class="fas fa-calculator text-sm" style="color:var(--primary)"></i></div>
+          <div><p class="s-title">คำนวณภาษีเงินได้ (ไทย)</p><p class="s-sub">คำนวณภาษีพร้อมค่าลดหย่อนครบ</p></div>
         </div>
-        <div class="w-full">
-          <p class="s-sub mb-1">เบี้ยประกันชีวิต/ปี (หักได้สูงสุด ฿100,000)</p>
-          <input type="number" id="tax-life-ins" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none" oninput="calcTax()">
-        </div>
-        <div class="w-full">
-          <p class="s-sub mb-1">กองทุน RMF/SSF/ปี (หักได้สูงสุด 30% ของรายได้)</p>
-          <input type="number" id="tax-fund" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none" oninput="calcTax()">
-        </div>
-        <div id="tax-result" class="w-full rounded-xl p-3 hidden" style="background:var(--primary-light)">
-          <div class="flex justify-between text-sm mb-1"><span style="color:var(--text-muted)">รายได้สุทธิ (หลังหักค่าใช้จ่าย)</span><span id="tr-net" class="font-semibold" style="color:var(--text)">—</span></div>
-          <div class="flex justify-between text-sm mb-1"><span style="color:var(--text-muted)">หักค่าลดหย่อนส่วนตัว</span><span id="tr-allow" class="font-semibold" style="color:var(--text)">—</span></div>
-          <div class="flex justify-between text-sm mb-2"><span style="color:var(--text-muted)">เงินได้สุทธิที่ต้องเสียภาษี</span><span id="tr-taxable" class="font-semibold" style="color:var(--text)">—</span></div>
-          <div class="border-t pt-2" style="border-color:var(--divider)">
-            <div class="flex justify-between"><span class="font-bold text-sm" style="color:var(--text)">ภาษีโดยประมาณ/ปี</span><span id="tr-tax" class="font-bold" style="color:var(--primary)">—</span></div>
-            <div class="flex justify-between mt-1"><span class="text-xs" style="color:var(--text-muted)">เฉลี่ย/เดือน</span><span id="tr-monthly" class="text-xs font-medium" style="color:var(--primary)">—</span></div>
-          </div>
-        </div>
-        <p class="text-xs" style="color:var(--text-sub)">* ประมาณการเท่านั้น สมมติ: หักค่าใช้จ่าย 50% (max ฿100K) + ลดหย่อนส่วนตัว ฿60K + ประกันสังคม ฿9K</p>
-      </div>
+        <i class="fas fa-chevron-right text-xs" style="color:var(--text-sub)"></i>
+      </a>
     </div>
 
     <!-- About -->
@@ -277,5 +261,6 @@
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/settings.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 </html>

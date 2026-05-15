@@ -14,7 +14,10 @@
 
   <header class="app-header text-white px-4 pt-10 pb-4">
     <div class="flex justify-between items-center">
-      <h1 class="text-xl font-bold">ทรัพย์สิน & หนี้สิน</h1>
+      <div class="flex items-center gap-3">
+        <button onclick="openDrawer()" class="hamburger-btn"><i class="fas fa-bars"></i></button>
+        <h1 class="text-xl font-bold">ทรัพย์สิน & หนี้สิน</h1>
+      </div>
       <button onclick="toggleLang()" class="text-white/60 text-sm border border-white/30 rounded-full px-3 py-1">TH/EN</button>
     </div>
     <div class="grid grid-cols-3 gap-2 mt-3">
@@ -129,5 +132,6 @@
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/assets.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 </html>

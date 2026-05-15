@@ -22,9 +22,12 @@
   <!-- Header -->
   <header class="app-header text-white px-4 pt-10 pb-6" style="background:linear-gradient(to right,#7c3aed,#4c1d95)">
     <div class="flex justify-between items-center">
-      <div>
-        <h1 class="text-xl font-bold">Cashflow Game 🎮</h1>
-        <p class="text-purple-200 text-sm mt-0.5">Robert Kiyosaki Style</p>
+      <div class="flex items-center gap-3">
+        <button onclick="openDrawer()" class="hamburger-btn"><i class="fas fa-bars"></i></button>
+        <div>
+          <h1 class="text-xl font-bold">Cashflow Game 🎮</h1>
+          <p class="text-purple-200 text-sm mt-0.5">Robert Kiyosaki Style</p>
+        </div>
       </div>
       <button onclick="toggleLang()" class="text-purple-200 text-sm border border-purple-400 rounded-full px-3 py-1">TH/EN</button>
     </div>
@@ -160,5 +163,6 @@
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/cashflow.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 </html>

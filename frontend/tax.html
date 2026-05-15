@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>คำนวณภาษีเงินได้</title>
+  <script src="js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .field-wrap { margin-bottom: .75rem; }
+    .tax-row { display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--divider);font-size:.875rem; }
+    .tax-row:last-child { border:none; }
+    .result-card { border-radius:1rem;padding:1rem;margin-top:.5rem; }
+  </style>
+</head>
+<body class="min-h-screen pb-20">
+
+  <header class="app-header text-white px-4 pt-10 pb-4">
+    <div class="flex items-center gap-3">
+      <button onclick="openDrawer()" class="hamburger-btn"><i class="fas fa-bars"></i></button>
+      <div>
+        <h1 class="text-xl font-bold">คำนวณภาษี</h1>
+        <p class="text-white/60 text-xs mt-0.5">ภาษีเงินได้บุคคลธรรมดา (ไทย 2568)</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 py-4 space-y-4">
+
+    <!-- Income Input -->
+    <div class="app-card rounded-2xl border p-4 space-y-3">
+      <h2 class="font-semibold text-sm" style="color:var(--text)">รายได้พึงประเมิน</h2>
+
+      <div class="field-wrap">
+        <label class="field-label">รายได้จากเงินเดือน/ปี (฿) <span class="text-red-400">*</span></label>
+        <input type="number" id="t-salary" inputmode="decimal" placeholder="เช่น 540000" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label">รายได้อื่นๆ/ปี (Freelance, เช่า, ฯลฯ)</label>
+        <input type="number" id="t-other" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+        <p class="text-xs mt-1" style="color:var(--text-sub)">หักค่าใช้จ่ายได้ 40-60% ขึ้นอยู่กับประเภท</p>
+      </div>
+    </div>
+
+    <!-- Deductions -->
+    <div class="app-card rounded-2xl border p-4 space-y-3">
+      <h2 class="font-semibold text-sm" style="color:var(--text)">ค่าลดหย่อน</h2>
+
+      <div class="field-wrap">
+        <label class="field-label">เบี้ยประกันชีวิต/ปี (หักได้ max ฿100,000)</label>
+        <input type="number" id="t-life-ins" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label">เบี้ยประกันสุขภาพ/ปี (รวมในวงเงินชีวิต)</label>
+        <input type="number" id="t-health-ins" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label">กองทุน RMF/ปี (หักได้ 30% ของรายได้ max ฿500K)</label>
+        <input type="number" id="t-rmf" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label">กองทุน SSF/ปี (หักได้ 30% ของรายได้ max ฿200K)</label>
+        <input type="number" id="t-ssf" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label">ลูก (คนละ ฿30,000 max 3 คน)</label>
+        <div class="flex gap-2">
+          <button onclick="adjustChild(-1)" class="app-input border rounded-xl px-4 py-3 font-bold">−</button>
+          <div class="app-input border rounded-xl px-4 py-3 flex-1 text-center font-bold" id="child-count">0</div>
+          <button onclick="adjustChild(1)" class="app-input border rounded-xl px-4 py-3 font-bold">+</button>
+        </div>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label">ดอกเบี้ยสินเชื่อบ้าน/ปี (หักได้ max ฿100,000)</label>
+        <input type="number" id="t-home-interest" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-label">เงินบริจาค/ปี (หักได้ 2 เท่า max 10% ของรายได้)</label>
+        <input type="number" id="t-donate" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none" oninput="calcTax()">
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="tax-result" class="hidden space-y-3">
+      <!-- Deduction breakdown -->
+      <div class="app-card rounded-2xl border p-4">
+        <h2 class="font-semibold text-sm mb-3" style="color:var(--text)">รายละเอียดการหักลดหย่อน</h2>
+        <div id="deduction-rows"></div>
+      </div>
+
+      <!-- Tax result -->
+      <div class="rounded-2xl p-4" style="background:var(--primary-light)">
+        <div class="tax-row">
+          <span style="color:var(--text-muted)">รายได้รวม</span>
+          <span id="r-gross" class="font-semibold" style="color:var(--text)">—</span>
+        </div>
+        <div class="tax-row">
+          <span style="color:var(--text-muted)">หักค่าใช้จ่าย</span>
+          <span id="r-emp-ded" class="font-semibold" style="color:var(--text)">—</span>
+        </div>
+        <div class="tax-row">
+          <span style="color:var(--text-muted)">หักค่าลดหย่อนรวม</span>
+          <span id="r-allow" class="font-semibold" style="color:var(--text)">—</span>
+        </div>
+        <div class="tax-row">
+          <span style="color:var(--text-muted)">เงินได้สุทธิที่ต้องเสียภาษี</span>
+          <span id="r-taxable" class="font-semibold" style="color:var(--text)">—</span>
+        </div>
+        <div class="border-t mt-2 pt-3" style="border-color:var(--divider)">
+          <div class="flex justify-between items-baseline">
+            <span class="font-bold" style="color:var(--text)">ภาษีโดยประมาณ/ปี</span>
+            <span id="r-tax" class="text-2xl font-bold" style="color:var(--primary)">—</span>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span class="text-xs" style="color:var(--text-muted)">เฉลี่ย/เดือน</span>
+            <span id="r-monthly" class="text-sm font-semibold" style="color:var(--primary)">—</span>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span class="text-xs" style="color:var(--text-muted)">อัตราภาษีที่แท้จริง (Effective rate)</span>
+            <span id="r-effective" class="text-sm font-semibold" style="color:var(--text-muted)">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tax brackets visualization -->
+      <div class="app-card rounded-2xl border p-4">
+        <h2 class="font-semibold text-sm mb-3" style="color:var(--text)">อัตราภาษีแบบขั้นบันได</h2>
+        <div id="bracket-bars"></div>
+      </div>
+    </div>
+
+    <!-- Note -->
+    <div class="rounded-xl p-3" style="background:var(--divider)">
+      <p class="text-xs" style="color:var(--text-muted)">⚠️ การคำนวณนี้เป็นการประมาณการเบื้องต้นเท่านั้น ไม่รวมค่าลดหย่อนทุกประเภท ควรปรึกษานักบัญชีหรือสรรพากรสำหรับการยื่นจริง</p>
+    </div>
+  </main>
+
+  <nav class="app-nav fixed bottom-0 left-0 right-0 border-t flex justify-around py-2 z-50">
+    <a href="index.html" class="flex flex-col items-center"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
+    <a href="transactions.html" class="flex flex-col items-center"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
+    <a href="assets.html" class="flex flex-col items-center"><i class="fas fa-wallet text-xl"></i><span class="text-xs mt-1">ทรัพย์สิน</span></a>
+    <a href="insurance.html" class="flex flex-col items-center"><i class="fas fa-shield-halved text-xl"></i><span class="text-xs mt-1">ประกัน</span></a>
+    <a href="settings.html" class="flex flex-col items-center"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1">ตั้งค่า</span></a>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/tax.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

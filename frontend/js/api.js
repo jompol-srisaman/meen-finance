@@ -42,6 +42,7 @@ const API = {
   getGoals:              () => apiGet('getGoals'),
   addGoal:               (data) => apiPost('addGoal', data),
   updateGoal:            (data) => apiPost('updateGoal', data),
+  deleteGoal:            (id) => apiPost('deleteGoal', { id }),
   getInsurance:          () => apiGet('getInsurance'),
   addInsurance:          (data) => apiPost('addInsurance', data),
   updateInsurance:       (data) => apiPost('updateInsurance', data),

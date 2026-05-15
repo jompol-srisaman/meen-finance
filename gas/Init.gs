@@ -25,7 +25,7 @@ function createSheets() {
     },
     {
       name: 'Goals',
-      headers: ['id', 'name', 'target_amount', 'current_amount', 'target_date', 'type', 'status']
+      headers: ['id', 'name', 'target_amount', 'current_amount', 'target_date', 'type', 'status', 'wallet', 'notes']
     },
     {
       name: 'Insurance',
@@ -129,9 +129,9 @@ function seedSampleData() {
   // ── Goals ─────────────────────────────────────────────────
   const goalSheet = ss.getSheetByName('Goals');
   const goalData = [
-    [generateId(), 'กองทุนฉุกเฉิน 6 เดือน',    'emergency_fund', 270000, 120000, '2026-12-31', 'active'],
-    [generateId(), 'ปิดหนี้บัตรเครดิต KBank', 'debt_payoff',    15000,  0,      '2026-08-31', 'active'],
-    [generateId(), 'ออมดาวน์รถ',               'savings',        150000, 35000,  '2027-06-30', 'active'],
+    [generateId(), 'กองทุนฉุกเฉิน 6 เดือน',    'emergency_fund', 270000, 120000, '2026-12-31', 'active',    'personal', 'ออมเดือนละ 5,000'],
+    [generateId(), 'ปิดหนี้บัตรเครดิต KBank', 'debt_payoff',    15000,  0,      '2026-08-31', 'active',    'personal', ''],
+    [generateId(), 'ออมดาวน์รถ',               'savings',        150000, 35000,  '2027-06-30', 'active',    'family',   ''],
   ];
   goalData.forEach(function(row) { goalSheet.appendRow(row); });
 
