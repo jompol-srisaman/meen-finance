@@ -1,6 +1,5 @@
-// Sheets.gs — All SpreadsheetApp CRUD operations
+// Sheets.gs — All SpreadsheetApp CRUD operations (v2)
 
-// IMPORTANT: Replace with your actual Google Sheets ID after creating the sheet.
 const SHEET_ID = '1ZpiHavAZOm_-j1_pvJ_w_jN_A2-gPnKOPRFHwr597yc';
 
 function getSpreadsheet() {
@@ -45,7 +44,7 @@ function addTransaction(data) {
     data.category,
     parseFloat(data.amount) || 0,
     data.description || '',
-    data.account || ''
+    data.wallet || 'personal'
   ]);
   return { success: true };
 }
@@ -67,6 +66,7 @@ function addAsset(data) {
     parseFloat(data.value) || 0,
     parseFloat(data.monthly_cashflow) || 0,
     data.date_added || new Date().toISOString().split('T')[0],
+    data.wallet || 'personal',
     data.notes || ''
   ]);
   return { success: true, id: id };
@@ -97,6 +97,7 @@ function addLiability(data) {
     parseFloat(data.balance) || 0,
     parseFloat(data.monthly_payment) || 0,
     parseFloat(data.interest_rate) || 0,
+    data.wallet || 'personal',
     data.notes || ''
   ]);
   return { success: true, id: id };
@@ -134,6 +135,10 @@ function updateIncomeSource(data) {
   return updateRowById(getSpreadsheet().getSheetByName('Income_Sources'), data);
 }
 
+function deleteIncomeSource(id) {
+  return deleteRowById(getSpreadsheet().getSheetByName('Income_Sources'), id);
+}
+
 // ── Expense Categories ────────────────────────────────────────
 
 function getExpenseCategories() {
@@ -150,10 +155,6 @@ function addExpenseCategory(data) {
 
 function deleteExpenseCategory(id) {
   return deleteRowById(getSpreadsheet().getSheetByName('Expense_Categories'), id);
-}
-
-function deleteIncomeSource(id) {
-  return deleteRowById(getSpreadsheet().getSheetByName('Income_Sources'), id);
 }
 
 // ── Goals ─────────────────────────────────────────────────────
@@ -180,6 +181,57 @@ function addGoal(data) {
 
 function updateGoal(data) {
   return updateRowById(getSpreadsheet().getSheetByName('Goals'), data);
+}
+
+// ── Insurance ─────────────────────────────────────────────────
+
+function getInsurance() {
+  const sheet = getSpreadsheet().getSheetByName('Insurance');
+  return sheetToObjects(sheet);
+}
+
+function addInsurance(data) {
+  const sheet = getSpreadsheet().getSheetByName('Insurance');
+  const id = generateId();
+  sheet.appendRow([
+    id,
+    data.name,
+    data.type || 'life',
+    data.provider || '',
+    parseFloat(data.premium_monthly) || 0,
+    parseFloat(data.coverage_amount) || 0,
+    data.start_date || '',
+    data.end_date || '',
+    data.wallet || 'personal',
+    data.notes || ''
+  ]);
+  return { success: true, id: id };
+}
+
+function updateInsurance(data) {
+  return updateRowById(getSpreadsheet().getSheetByName('Insurance'), data);
+}
+
+function deleteInsurance(id) {
+  return deleteRowById(getSpreadsheet().getSheetByName('Insurance'), id);
+}
+
+function getInsuranceSummary() {
+  const list = getInsurance();
+  let totalMonthly = 0;
+  const byType = {};
+  list.forEach(function(ins) {
+    const pm = parseFloat(ins.premium_monthly) || 0;
+    totalMonthly += pm;
+    byType[ins.type] = (byType[ins.type] || 0) + pm;
+  });
+  return {
+    list: list,
+    totalMonthly: totalMonthly,
+    totalAnnual: totalMonthly * 12,
+    byType: byType,
+    count: list.length
+  };
 }
 
 // ── Settings ──────────────────────────────────────────────────

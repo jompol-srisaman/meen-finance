@@ -177,12 +177,41 @@
       </a>
     </div>
 
+    <!-- Thai Tax Calculator -->
+    <p class="sec-label">คำนวณภาษีเงินได้บุคคลธรรมดา (ไทย)</p>
+    <div class="s-group">
+      <div class="s-row" style="flex-direction:column;align-items:flex-start;gap:0.75rem">
+        <div class="w-full">
+          <p class="s-sub mb-1">รายได้จากเงินเดือน/ปี (฿)</p>
+          <input type="number" id="tax-income" inputmode="decimal" placeholder="เช่น 540000" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none" oninput="calcTax()">
+        </div>
+        <div class="w-full">
+          <p class="s-sub mb-1">เบี้ยประกันชีวิต/ปี (หักได้สูงสุด ฿100,000)</p>
+          <input type="number" id="tax-life-ins" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none" oninput="calcTax()">
+        </div>
+        <div class="w-full">
+          <p class="s-sub mb-1">กองทุน RMF/SSF/ปี (หักได้สูงสุด 30% ของรายได้)</p>
+          <input type="number" id="tax-fund" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none" oninput="calcTax()">
+        </div>
+        <div id="tax-result" class="w-full rounded-xl p-3 hidden" style="background:var(--primary-light)">
+          <div class="flex justify-between text-sm mb-1"><span style="color:var(--text-muted)">รายได้สุทธิ (หลังหักค่าใช้จ่าย)</span><span id="tr-net" class="font-semibold" style="color:var(--text)">—</span></div>
+          <div class="flex justify-between text-sm mb-1"><span style="color:var(--text-muted)">หักค่าลดหย่อนส่วนตัว</span><span id="tr-allow" class="font-semibold" style="color:var(--text)">—</span></div>
+          <div class="flex justify-between text-sm mb-2"><span style="color:var(--text-muted)">เงินได้สุทธิที่ต้องเสียภาษี</span><span id="tr-taxable" class="font-semibold" style="color:var(--text)">—</span></div>
+          <div class="border-t pt-2" style="border-color:var(--divider)">
+            <div class="flex justify-between"><span class="font-bold text-sm" style="color:var(--text)">ภาษีโดยประมาณ/ปี</span><span id="tr-tax" class="font-bold" style="color:var(--primary)">—</span></div>
+            <div class="flex justify-between mt-1"><span class="text-xs" style="color:var(--text-muted)">เฉลี่ย/เดือน</span><span id="tr-monthly" class="text-xs font-medium" style="color:var(--primary)">—</span></div>
+          </div>
+        </div>
+        <p class="text-xs" style="color:var(--text-sub)">* ประมาณการเท่านั้น สมมติ: หักค่าใช้จ่าย 50% (max ฿100K) + ลดหย่อนส่วนตัว ฿60K + ประกันสังคม ฿9K</p>
+      </div>
+    </div>
+
     <!-- About -->
     <p class="sec-label">เกี่ยวกับ</p>
     <div class="s-group">
-      <div class="s-row"><p class="s-title">เวอร์ชัน</p><span class="text-sm" style="color:var(--text-sub)">1.0.0</span></div>
+      <div class="s-row"><p class="s-title">เวอร์ชัน</p><span class="text-sm" style="color:var(--text-sub)">2.0.0</span></div>
       <div class="s-row"><p class="s-title">สร้างด้วย</p><span class="text-sm" style="color:var(--text-sub)">GAS + GitHub Pages</span></div>
-      <div class="s-row"><div><p class="s-title">แนวคิด</p><p class="s-sub">Robert Kiyosaki — Rich Dad Poor Dad</p></div><span class="text-xl">📚</span></div>
+      <div class="s-row"><div><p class="s-title">แนวคิด</p><p class="s-sub">Robert Kiyosaki + Timeflow</p></div><span class="text-xl">📚</span></div>
     </div>
 
     <div class="h-4"></div>
@@ -240,8 +269,8 @@
   <nav class="app-nav fixed bottom-0 left-0 right-0 border-t flex justify-around py-2 z-50">
     <a href="index.html" class="flex flex-col items-center"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
     <a href="transactions.html" class="flex flex-col items-center"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
-    <a href="cashflow.html" class="flex flex-col items-center"><i class="fas fa-gamepad text-xl"></i><span class="text-xs mt-1">Cashflow</span></a>
-    <a href="goals.html" class="flex flex-col items-center"><i class="fas fa-bullseye text-xl"></i><span class="text-xs mt-1">เป้าหมาย</span></a>
+    <a href="assets.html" class="flex flex-col items-center"><i class="fas fa-wallet text-xl"></i><span class="text-xs mt-1">ทรัพย์สิน</span></a>
+    <a href="insurance.html" class="flex flex-col items-center"><i class="fas fa-shield-halved text-xl"></i><span class="text-xs mt-1">ประกัน</span></a>
     <a href="settings.html" class="active flex flex-col items-center"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1">ตั้งค่า</span></a>
   </nav>
 

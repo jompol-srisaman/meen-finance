@@ -1,14 +1,18 @@
 // transactions.js
 
-let currentType = 'expense';
+let currentType = 'income'; // default to income (matches initial UI state)
+let currentWalletFilter = 'all';
 let currentMonth = new Date().getMonth() + 1;
 let currentYear = new Date().getFullYear();
 
+const INCOME_CATS = ['เงินเดือน','Freelance/งานพิเศษ','รายได้เช่า','ปันผล/กองทุน','ขายของ/บริการ','รายได้อื่นๆ'];
+const EXPENSE_CATS = ['อาหาร/เครื่องดื่ม','เดินทาง/น้ำมัน','ที่พัก/บ้าน','สุขภาพ','บันเทิง','ช้อปปิ้ง','ค่าประกัน','ออม/ลงทุน','หนี้/ผ่อน','อื่นๆ'];
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Set today's date
   document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
   updateMonthLabel();
   loadTransactions();
+  setWalletFilter('all');
 });
 
 function updateMonthLabel() {
@@ -24,11 +28,29 @@ function changeMonth(delta) {
   loadTransactions();
 }
 
+function setWalletFilter(w) {
+  currentWalletFilter = w;
+  ['all','personal','family'].forEach(id => {
+    const btn = document.getElementById('wf-' + id);
+    if (!btn) return;
+    if (id === w) {
+      btn.style.cssText = 'background:var(--primary);color:white;border-color:var(--primary)';
+    } else {
+      btn.style.cssText = 'background:transparent;color:var(--text-muted);border-color:var(--divider)';
+    }
+  });
+  loadTransactions();
+}
+
 async function loadTransactions() {
   const el = document.getElementById('tx-list');
-  el.innerHTML = '<div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>';
+  el.innerHTML = '<div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color:var(--primary)"></div></div>';
   try {
-    const txs = await API.getTransactions(currentMonth, currentYear);
+    let txs = await API.getTransactions(currentMonth, currentYear);
+
+    if (currentWalletFilter !== 'all') {
+      txs = txs.filter(t => (t.wallet || t.account || 'personal') === currentWalletFilter);
+    }
 
     let incomeSum = 0, expenseSum = 0;
     txs.forEach(t => {
@@ -45,11 +67,10 @@ async function loadTransactions() {
     netEl.className = 'font-bold text-sm mt-1 ' + (net >= 0 ? 'text-blue-600' : 'text-red-500');
 
     if (!txs.length) {
-      el.innerHTML = `<div class="text-center py-12 text-gray-400"><i class="fas fa-receipt text-4xl mb-3"></i><p>ยังไม่มีรายการในเดือนนี้</p></div>`;
+      el.innerHTML = `<div class="text-center py-12" style="color:var(--text-sub)"><i class="fas fa-receipt text-4xl mb-3 block"></i><p>ยังไม่มีรายการในเดือนนี้</p></div>`;
       return;
     }
 
-    // Group by date
     const grouped = {};
     txs.forEach(t => {
       const d = t.date || 'unknown';
@@ -60,20 +81,20 @@ async function loadTransactions() {
     const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
     el.innerHTML = sortedDates.map(date => `
       <div class="mb-3">
-        <p class="text-xs text-gray-400 font-medium mb-1">${formatDate(date)}</p>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <p class="text-xs font-medium mb-1 px-1" style="color:var(--text-sub)">${formatDate(date)}</p>
+        <div class="app-card rounded-xl shadow-sm border overflow-hidden">
           ${grouped[date].map(tx => `
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-50 last:border-0">
+            <div class="flex items-center justify-between px-4 py-3 border-b last:border-0" style="border-color:var(--divider)">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center ${tx.type === 'income' ? 'bg-green-100' : 'bg-red-100'}">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${tx.type === 'income' ? 'bg-green-100' : 'bg-red-100'}">
                   <i class="fas ${tx.type === 'income' ? 'fa-arrow-down text-green-500' : 'fa-arrow-up text-red-500'} text-sm"></i>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-700">${tx.description || tx.category}</p>
-                  <p class="text-xs text-gray-400">${tx.category}</p>
+                  <p class="text-sm font-medium" style="color:var(--text)">${tx.description || tx.category}</p>
+                  <p class="text-xs" style="color:var(--text-muted)">${tx.category} · ${walletLabel(tx.wallet || tx.account)}</p>
                 </div>
               </div>
-              <span class="font-semibold text-sm ${tx.type === 'income' ? 'text-green-600' : 'text-red-500'}">
+              <span class="font-semibold text-sm flex-shrink-0 ${tx.type === 'income' ? 'text-green-600' : 'text-red-500'}">
                 ${tx.type === 'income' ? '+' : '-'}${formatMoney(tx.amount)}
               </span>
             </div>
@@ -82,8 +103,12 @@ async function loadTransactions() {
       </div>
     `).join('');
   } catch (e) {
-    el.innerHTML = `<div class="text-center py-8 text-red-400"><i class="fas fa-exclamation-circle text-3xl mb-2"></i><p>โหลดข้อมูลไม่ได้ กรุณาลองใหม่</p></div>`;
+    el.innerHTML = `<div class="text-center py-8 text-red-400"><i class="fas fa-exclamation-circle text-3xl mb-2 block"></i><p>โหลดข้อมูลไม่ได้ กรุณาลองใหม่</p></div>`;
   }
+}
+
+function walletLabel(w) {
+  return w === 'family' ? '👨‍👩‍👧 ครอบครัว' : '👤 ส่วนตัว';
 }
 
 function formatDate(dateStr) {
@@ -93,8 +118,14 @@ function formatDate(dateStr) {
 }
 
 function openModal() {
+  currentType = 'income';
+  setType('income');
+  document.getElementById('tx-amount').value = '';
+  document.getElementById('tx-desc').value = '';
+  document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('tx-wallet').value = 'personal';
   document.getElementById('modal').classList.remove('hidden');
-  document.getElementById('tx-amount').focus();
+  setTimeout(() => document.getElementById('tx-amount').focus(), 150);
 }
 
 function closeModal() {
@@ -103,13 +134,26 @@ function closeModal() {
 
 function setType(type) {
   currentType = type;
+  const incBtn = document.getElementById('btn-income');
+  const expBtn = document.getElementById('btn-expense');
   if (type === 'income') {
-    document.getElementById('btn-income').className = 'flex-1 py-2 rounded-xl font-medium bg-green-500 text-white text-sm';
-    document.getElementById('btn-expense').className = 'flex-1 py-2 rounded-xl font-medium bg-gray-200 text-gray-600 text-sm';
+    incBtn.className = 'flex-1 py-2 rounded-xl font-medium bg-green-500 text-white text-sm';
+    incBtn.removeAttribute('style');
+    expBtn.className = 'flex-1 py-2 rounded-xl font-medium text-sm';
+    expBtn.style.cssText = 'background:var(--bg);color:var(--text-muted)';
   } else {
-    document.getElementById('btn-expense').className = 'flex-1 py-2 rounded-xl font-medium bg-red-500 text-white text-sm';
-    document.getElementById('btn-income').className = 'flex-1 py-2 rounded-xl font-medium bg-gray-200 text-gray-600 text-sm';
+    expBtn.className = 'flex-1 py-2 rounded-xl font-medium bg-red-500 text-white text-sm';
+    expBtn.removeAttribute('style');
+    incBtn.className = 'flex-1 py-2 rounded-xl font-medium text-sm';
+    incBtn.style.cssText = 'background:var(--bg);color:var(--text-muted)';
   }
+  updateCategories(type);
+}
+
+function updateCategories(type) {
+  const select = document.getElementById('tx-category');
+  const opts = type === 'income' ? INCOME_CATS : EXPENSE_CATS;
+  select.innerHTML = opts.map(o => `<option value="${o}">${o}</option>`).join('');
 }
 
 async function saveTransaction() {
@@ -130,11 +174,9 @@ async function saveTransaction() {
       category: document.getElementById('tx-category').value,
       amount: amount,
       description: document.getElementById('tx-desc').value,
+      wallet: document.getElementById('tx-wallet').value,
     });
     closeModal();
-    // Reset form
-    document.getElementById('tx-amount').value = '';
-    document.getElementById('tx-desc').value = '';
     loadTransactions();
   } catch (e) {
     alert('บันทึกไม่สำเร็จ กรุณาลองใหม่');

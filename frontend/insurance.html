@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ประกันภัย</title>
+  <script src="js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>body { font-family: 'Segoe UI', sans-serif; }</style>
+</head>
+<body class="min-h-screen pb-20">
+
+  <header class="app-header text-white px-4 pt-10 pb-4">
+    <div class="flex justify-between items-center">
+      <h1 class="text-xl font-bold">ประกันภัย</h1>
+      <button onclick="toggleLang()" class="text-white/60 text-sm border border-white/30 rounded-full px-3 py-1">TH/EN</button>
+    </div>
+    <!-- Summary bar -->
+    <div class="grid grid-cols-3 gap-2 mt-3">
+      <div class="bg-white/20 rounded-xl p-2 text-center">
+        <p class="text-white/70 text-xs">ฉบับทั้งหมด</p>
+        <p id="hdr-count" class="font-bold text-sm mt-0.5">—</p>
+      </div>
+      <div class="bg-white/20 rounded-xl p-2 text-center">
+        <p class="text-white/70 text-xs">เบี้ย/เดือน</p>
+        <p id="hdr-monthly" class="font-bold text-sm mt-0.5">—</p>
+      </div>
+      <div class="bg-white rounded-xl p-2 text-center">
+        <p class="text-xs" style="color:var(--text-muted)">เบี้ย/ปี</p>
+        <p id="hdr-annual" class="font-bold text-sm mt-0.5" style="color:var(--primary)">—</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Wallet filter -->
+  <div class="px-4 pt-3 flex gap-2">
+    <button id="wf-all" onclick="setWalletFilter('all')" class="px-3 py-1 rounded-full text-xs font-medium border">ทั้งหมด</button>
+    <button id="wf-personal" onclick="setWalletFilter('personal')" class="px-3 py-1 rounded-full text-xs font-medium border">👤 ส่วนตัว</button>
+    <button id="wf-family" onclick="setWalletFilter('family')" class="px-3 py-1 rounded-full text-xs font-medium border">👨‍👩‍👧 ครอบครัว</button>
+  </div>
+
+  <main class="px-4 py-3 space-y-3">
+    <button onclick="openModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 shadow-sm" style="background-color:var(--primary)">
+      <i class="fas fa-plus"></i> เพิ่มกรมธรรม์
+    </button>
+
+    <!-- Type filter tabs -->
+    <div class="flex gap-1 overflow-x-auto pb-1">
+      <button onclick="setTypeFilter('all')" id="tf-all" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">ทั้งหมด</button>
+      <button onclick="setTypeFilter('life')" id="tf-life" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">ชีวิต</button>
+      <button onclick="setTypeFilter('health')" id="tf-health" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">สุขภาพ</button>
+      <button onclick="setTypeFilter('accident')" id="tf-accident" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">อุบัติเหตุ</button>
+      <button onclick="setTypeFilter('vehicle')" id="tf-vehicle" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">รถยนต์</button>
+      <button onclick="setTypeFilter('property')" id="tf-property" class="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0">ทรัพย์สิน</button>
+    </div>
+
+    <div id="ins-list">
+      <div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color:var(--primary)"></div></div>
+    </div>
+  </main>
+
+  <!-- Add Insurance Modal -->
+  <div id="ins-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2>เพิ่มกรมธรรม์</h2>
+        <button onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <label class="field-label">ชื่อกรมธรรม์</label>
+          <input type="text" id="ins-name" placeholder="เช่น ประกันชีวิต AIA" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+        </div>
+        <div>
+          <label class="field-label">ประเภทประกัน</label>
+          <select id="ins-type" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+            <option value="life">ประกันชีวิต</option>
+            <option value="health">ประกันสุขภาพ</option>
+            <option value="accident">ประกันอุบัติเหตุ (PA)</option>
+            <option value="vehicle">ประกันรถยนต์</option>
+            <option value="property">ประกันทรัพย์สิน/บ้าน</option>
+            <option value="other">อื่นๆ</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">บริษัทประกัน</label>
+          <input type="text" id="ins-provider" placeholder="เช่น AIA, Cigna, Tokio Marine" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+        </div>
+        <div>
+          <label class="field-label">เบี้ยประกัน/เดือน (฿)</label>
+          <input type="number" id="ins-premium" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+        </div>
+        <div>
+          <label class="field-label">วงเงินคุ้มครอง (฿)</label>
+          <input type="number" id="ins-coverage" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">วันเริ่มคุ้มครอง</label>
+            <input type="date" id="ins-start" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          </div>
+          <div>
+            <label class="field-label">วันสิ้นสุด</label>
+            <input type="date" id="ins-end" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="field-label">กระเป๋าเงิน</label>
+          <select id="ins-wallet" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+            <option value="personal">👤 ส่วนตัว</option>
+            <option value="family">👨‍👩‍👧 ครอบครัว</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">หมายเหตุ</label>
+          <input type="text" id="ins-notes" placeholder="เช่น OPD+IPD, จ่ายรายปี" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="saveInsurance()" id="ins-save-btn" style="background-color:var(--primary)">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="app-nav fixed bottom-0 left-0 right-0 border-t flex justify-around py-2 z-50">
+    <a href="index.html" class="flex flex-col items-center"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
+    <a href="transactions.html" class="flex flex-col items-center"><i class="fas fa-list text-xl"></i><span class="text-xs mt-1">รายการ</span></a>
+    <a href="assets.html" class="flex flex-col items-center"><i class="fas fa-wallet text-xl"></i><span class="text-xs mt-1">ทรัพย์สิน</span></a>
+    <a href="insurance.html" class="active flex flex-col items-center"><i class="fas fa-shield-halved text-xl"></i><span class="text-xs mt-1">ประกัน</span></a>
+    <a href="settings.html" class="flex flex-col items-center"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1">ตั้งค่า</span></a>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/insurance.js"></script>
+</body>
+</html>

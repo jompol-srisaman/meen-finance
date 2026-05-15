@@ -1,4 +1,4 @@
-// api.js — Single fetch wrapper for all GAS calls
+// api.js — Single fetch wrapper for all GAS calls (v2)
 
 async function apiGet(action, params = {}) {
   const url = new URL(GAS_URL);
@@ -21,36 +21,40 @@ async function apiPost(action, data = {}) {
   return res.json();
 }
 
-// Convenience functions
 const API = {
-  getTransactions: (month, year) => apiGet('getTransactions', { month, year }),
-  addTransaction: (data) => apiPost('addTransaction', data),
-  getAssets: () => apiGet('getAssets'),
-  addAsset: (data) => apiPost('addAsset', data),
-  updateAsset: (data) => apiPost('updateAsset', data),
-  deleteAsset: (id) => apiPost('deleteAsset', { id }),
-  getLiabilities: () => apiGet('getLiabilities'),
-  addLiability: (data) => apiPost('addLiability', data),
-  updateLiability: (data) => apiPost('updateLiability', data),
-  deleteLiability: (id) => apiPost('deleteLiability', { id }),
-  getIncomeSources: () => apiGet('getIncomeSources'),
-  addIncomeSource: (data) => apiPost('addIncomeSource', data),
-  updateIncomeSource: (data) => apiPost('updateIncomeSource', data),
-  getExpenseCategories: () => apiGet('getExpenseCategories'),
-  addExpenseCategory: (data) => apiPost('addExpenseCategory', data),
+  getTransactions:       (month, year) => apiGet('getTransactions', { month, year }),
+  addTransaction:        (data) => apiPost('addTransaction', data),
+  getAssets:             () => apiGet('getAssets'),
+  addAsset:              (data) => apiPost('addAsset', data),
+  updateAsset:           (data) => apiPost('updateAsset', data),
+  deleteAsset:           (id) => apiPost('deleteAsset', { id }),
+  getLiabilities:        () => apiGet('getLiabilities'),
+  addLiability:          (data) => apiPost('addLiability', data),
+  updateLiability:       (data) => apiPost('updateLiability', data),
+  deleteLiability:       (id) => apiPost('deleteLiability', { id }),
+  getIncomeSources:      () => apiGet('getIncomeSources'),
+  addIncomeSource:       (data) => apiPost('addIncomeSource', data),
+  updateIncomeSource:    (data) => apiPost('updateIncomeSource', data),
+  deleteIncomeSource:    (id) => apiPost('deleteIncomeSource', { id }),
+  getExpenseCategories:  () => apiGet('getExpenseCategories'),
+  addExpenseCategory:    (data) => apiPost('addExpenseCategory', data),
   deleteExpenseCategory: (id) => apiPost('deleteExpenseCategory', { id }),
-  deleteIncomeSource: (id) => apiPost('deleteIncomeSource', { id }),
-  getGoals: () => apiGet('getGoals'),
-  addGoal: (data) => apiPost('addGoal', data),
-  updateGoal: (data) => apiPost('updateGoal', data),
-  getIncomeStatement: (month, year) => apiGet('getIncomeStatement', { month, year }),
-  getBalanceSheet: () => apiGet('getBalanceSheet'),
-  getFreedomMeter: () => apiGet('getFreedomMeter'),
-  getSettings: () => apiGet('getSettings'),
+  getGoals:              () => apiGet('getGoals'),
+  addGoal:               (data) => apiPost('addGoal', data),
+  updateGoal:            (data) => apiPost('updateGoal', data),
+  getInsurance:          () => apiGet('getInsurance'),
+  addInsurance:          (data) => apiPost('addInsurance', data),
+  updateInsurance:       (data) => apiPost('updateInsurance', data),
+  deleteInsurance:       (id) => apiPost('deleteInsurance', { id }),
+  getInsuranceSummary:   () => apiGet('getInsuranceSummary'),
+  getIncomeStatement:    (month, year) => apiGet('getIncomeStatement', { month, year }),
+  getBalanceSheet:       () => apiGet('getBalanceSheet'),
+  getFreedomMeter:       () => apiGet('getFreedomMeter'),
+  getSettings:           () => apiGet('getSettings'),
 };
 
 function showLoading(el) {
-  if (el) el.innerHTML = '<div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>';
+  if (el) el.innerHTML = '<div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color:var(--primary)"></div></div>';
 }
 
 function showError(el, msg) {
