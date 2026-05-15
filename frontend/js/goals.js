@@ -3,6 +3,8 @@
 let allGoals = [];
 let activeFilter = 'all';
 
+const AUTO_SYNC_TYPES = ['savings', 'investment', 'debt_payoff', 'emergency_fund', 'monthly_cashflow'];
+
 document.addEventListener('DOMContentLoaded', () => {
   loadGoals();
 });
@@ -20,7 +22,7 @@ function formatGoalDate(dateStr) {
 }
 
 function goalTypeLabel(k) {
-  return { savings: 'เงินออม', emergency_fund: 'กองทุนฉุกเฉิน', investment: 'การลงทุน', debt_payoff: 'ปิดหนี้', other: 'อื่นๆ' }[k] || k;
+  return { savings: 'เงินออม', emergency_fund: 'กองทุนฉุกเฉิน', investment: 'การลงทุน', debt_payoff: 'ปิดหนี้', monthly_cashflow: 'Cashflow รายเดือน', other: 'อื่นๆ' }[k] || k;
 }
 
 function goalTypeBadge(k) {
@@ -160,6 +162,7 @@ function goalCard(g) {
         <div class="flex flex-wrap gap-1 mt-1">
           <span class="text-xs rounded-full px-2 py-0.5 ${goalTypeBadge(g.type)}">${goalTypeLabel(g.type)}</span>
           <span class="text-xs rounded-full px-2 py-0.5 bg-gray-100" style="color:var(--text-muted)">${walletBadge}</span>
+          ${AUTO_SYNC_TYPES.includes(g.type) ? '<span class="text-xs rounded-full px-2 py-0.5 bg-blue-50 text-blue-400">🔄 auto</span>' : ''}
         </div>
       </div>
       <div class="text-right ml-3 flex-shrink-0">
@@ -290,4 +293,38 @@ async function deleteGoal(id) {
   if (!confirm('ลบเป้าหมายนี้?')) return;
   await API.deleteGoal(id);
   loadGoals();
+}
+
+// ── Auto-Sync from Financial Data ────────────────────────────
+
+async function syncGoals() {
+  const btn = document.getElementById('sync-btn');
+  if (btn) {
+    btn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i><span class="text-sm">กำลังอัปเดต...</span>';
+    btn.disabled = true;
+  }
+  try {
+    const result = await API.syncGoalsProgress();
+    await loadGoals();
+    const count = result.synced || 0;
+    showGoalToast(count > 0 ? `✅ อัปเดต ${count} เป้าหมายจากข้อมูลจริงแล้ว` : 'ไม่มีเป้าหมายที่อัปเดตอัตโนมัติได้');
+  } catch (e) {
+    showGoalToast('อัปเดตไม่สำเร็จ กรุณาลองใหม่');
+  } finally {
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-sync-alt"></i><span class="text-sm">อัปเดต</span>';
+      btn.disabled = false;
+    }
+  }
+}
+
+function showGoalToast(msg) {
+  const old = document.getElementById('goal-toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'goal-toast';
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;font-size:0.85rem;padding:0.6rem 1.25rem;border-radius:99px;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.2);white-space:nowrap;max-width:90vw;text-align:center';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
 }

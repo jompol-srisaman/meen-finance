@@ -250,6 +250,109 @@ function getSettings() {
   return settings;
 }
 
+// ── Milestones (stored as JSON in Settings) ───────────────────
+
+var DEFAULT_MILESTONES = [
+  { pct: 0,   label: 'Rat Race', emoji: '🐀' },
+  { pct: 25,  label: 'เริ่มตื่นรู้', emoji: '🌱' },
+  { pct: 50,  label: 'Fast Track', emoji: '🌿' },
+  { pct: 75,  label: 'ใกล้อิสระ', emoji: '🌳' },
+  { pct: 100, label: 'Financial Freedom', emoji: '🏆' }
+];
+
+function getMilestones() {
+  var settings = getSettings();
+  if (settings.milestones) {
+    try { return JSON.parse(settings.milestones); } catch(e) {}
+  }
+  return DEFAULT_MILESTONES;
+}
+
+function saveMilestones(milestones) {
+  var sheet = getSpreadsheet().getSheetByName('Settings');
+  if (!sheet) return { error: 'No Settings sheet' };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === 'milestones') {
+      sheet.getRange(i + 1, 2).setValue(JSON.stringify(milestones));
+      return { success: true };
+    }
+  }
+  sheet.appendRow(['milestones', JSON.stringify(milestones)]);
+  return { success: true };
+}
+
+// ── Goals Auto-Sync ───────────────────────────────────────────
+
+function syncGoalsProgress() {
+  var now = new Date();
+  var assets = getAssets();
+  var liabilities = getLiabilities();
+  var txs = getTransactions(now.getMonth() + 1, now.getFullYear());
+  var expCats = getExpenseCategories();
+
+  var savingsTotal = assets.filter(function(a) { return a.category === 'savings'; })
+    .reduce(function(s, a) { return s + (parseFloat(a.value) || 0); }, 0);
+  var investTotal = assets.filter(function(a) { return ['stocks','real_estate','business'].indexOf(a.category) >= 0; })
+    .reduce(function(s, a) { return s + (parseFloat(a.value) || 0); }, 0);
+  var liabTotal = liabilities.reduce(function(s, l) { return s + (parseFloat(l.balance) || 0); }, 0);
+  var incomeTotal = txs.filter(function(t) { return t.type === 'income'; })
+    .reduce(function(s, t) { return s + (parseFloat(t.amount) || 0); }, 0);
+  var expenseTotal = txs.filter(function(t) { return t.type === 'expense'; })
+    .reduce(function(s, t) { return s + (parseFloat(t.amount) || 0); }, 0);
+  var monthlyExpenses = expCats.reduce(function(s, c) { return s + (parseFloat(c.monthly_budget) || 0); }, 0);
+
+  var sheet = getSpreadsheet().getSheetByName('Goals');
+  if (!sheet) return { synced: 0 };
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) return { synced: 0 };
+
+  var headers = data[0];
+  var typeIdx = headers.indexOf('type');
+  var currentIdx = headers.indexOf('current_amount');
+  var targetIdx = headers.indexOf('target_amount');
+
+  var synced = 0;
+  for (var i = 1; i < data.length; i++) {
+    var type = data[i][typeIdx];
+    var newCurrent = null;
+    var newTarget = null;
+
+    if (type === 'savings') {
+      newCurrent = savingsTotal;
+    } else if (type === 'investment') {
+      newCurrent = investTotal;
+    } else if (type === 'debt_payoff') {
+      var origTarget = parseFloat(data[i][targetIdx]) || 0;
+      newCurrent = Math.max(0, origTarget - liabTotal);
+    } else if (type === 'emergency_fund') {
+      newCurrent = savingsTotal;
+      if (monthlyExpenses > 0) newTarget = monthlyExpenses * 6;
+    } else if (type === 'monthly_cashflow') {
+      newCurrent = incomeTotal - expenseTotal;
+    }
+
+    if (newCurrent !== null) {
+      sheet.getRange(i + 1, currentIdx + 1).setValue(newCurrent);
+      synced++;
+    }
+    if (newTarget !== null) {
+      sheet.getRange(i + 1, targetIdx + 1).setValue(newTarget);
+    }
+  }
+
+  return {
+    synced: synced,
+    snapshot: {
+      savingsTotal: savingsTotal,
+      investTotal: investTotal,
+      liabTotal: liabTotal,
+      monthlyCashflow: incomeTotal - expenseTotal,
+      emergencyFundTarget: monthlyExpenses * 6
+    }
+  };
+}
+
 // ── Cashflow Game Aggregates ──────────────────────────────────
 
 function getIncomeStatement(month, year) {

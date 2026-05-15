@@ -69,6 +69,22 @@
       </div>
     </div>
 
+    <!-- RAT RACE Ladder -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div class="flex justify-between items-center mb-3">
+        <div>
+          <h2 class="font-semibold text-gray-700">RAT RACE Ladder</h2>
+          <p class="text-xs text-gray-400 mt-0.5">เส้นทางสู่อิสรภาพทางการเงิน</p>
+        </div>
+        <button onclick="openLadderEditor()" class="text-xs px-3 py-1.5 rounded-xl border font-medium" style="color:var(--primary);border-color:var(--primary)">
+          <i class="fas fa-sliders-h mr-1"></i>ปรับขั้น
+        </button>
+      </div>
+      <div id="ladder-container">
+        <div class="flex justify-center p-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2" style="border-color:var(--primary)"></div></div>
+      </div>
+    </div>
+
     <!-- Income Statement (Cashflow Game Card) -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
       <div class="flex justify-between items-center mb-3">
@@ -151,6 +167,31 @@
 
   </main>
 
+  <!-- Ladder Editor Modal -->
+  <div id="ladder-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2>ตั้งค่าขั้น RAT RACE</h2>
+        <button onclick="closeLadderModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-xs mb-3" style="color:var(--text-muted)">กำหนด % Freedom Ratio แต่ละขั้น เพิ่ม/แก้ไข/ลบได้ตามต้องการ</p>
+        <div class="flex gap-1 text-xs mb-2 px-1" style="color:var(--text-sub)">
+          <span class="w-12 text-center">ไอคอน</span>
+          <span class="w-16 text-center">%</span>
+          <span class="flex-1">ชื่อขั้น</span>
+        </div>
+        <div id="milestone-rows"></div>
+        <button onclick="addMilestoneRow()" class="w-full border-2 border-dashed rounded-xl py-3 text-sm mt-2 font-medium" style="border-color:var(--divider);color:var(--text-muted)">
+          <i class="fas fa-plus mr-1"></i>เพิ่มขั้น
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button onclick="saveLadder()" style="background-color:var(--primary)">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom Nav -->
   <nav class="app-nav fixed bottom-0 left-0 right-0 border-t flex justify-around py-2 z-50">
     <a href="index.html" class="flex flex-col items-center"><i class="fas fa-home text-xl"></i><span class="text-xs mt-1">หน้าหลัก</span></a>
@@ -164,5 +205,10 @@
   <script src="js/api.js"></script>
   <script src="js/cashflow.js"></script>
   <script src="js/nav.js"></script>
+  <script>
+    document.querySelectorAll('.modal-sheet').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) closeLadderModal(); });
+    });
+  </script>
 </body>
 </html>

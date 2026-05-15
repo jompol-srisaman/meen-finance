@@ -52,6 +52,9 @@ const API = {
   getBalanceSheet:       () => apiGet('getBalanceSheet'),
   getFreedomMeter:       () => apiGet('getFreedomMeter'),
   getSettings:           () => apiGet('getSettings'),
+  getMilestones:         () => apiGet('getMilestones'),
+  saveMilestones:        (milestones) => apiPost('saveMilestones', { milestones }),
+  syncGoalsProgress:     () => apiGet('syncGoalsProgress'),
 };
 
 function showLoading(el) {

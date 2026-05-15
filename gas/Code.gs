@@ -47,6 +47,9 @@ function doGet(e) {
       case 'getBalanceSheet':       result = getBalanceSheet(); break;
       case 'getFreedomMeter':       result = getFreedomMeter(); break;
       case 'getSettings':           result = getSettings(); break;
+      case 'getMilestones':         result = getMilestones(); break;
+      case 'saveMilestones':        result = saveMilestones(body.milestones); break;
+      case 'syncGoalsProgress':     result = syncGoalsProgress(); break;
       case 'initSheets':            createSheets(); result = { success: true }; break;
       default: return jsonResponse({ error: 'Unknown action: ' + action });
     }

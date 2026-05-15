@@ -42,10 +42,15 @@
   </header>
 
   <main class="px-4 py-4 space-y-3">
-    <!-- Add button -->
-    <button onclick="openModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 shadow-sm bg-orange-500">
-      <i class="fas fa-plus"></i> เพิ่มเป้าหมายใหม่
-    </button>
+    <!-- Add + Auto-sync buttons -->
+    <div class="flex gap-2">
+      <button onclick="openModal()" class="flex-1 text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 shadow-sm bg-orange-500">
+        <i class="fas fa-plus"></i> เพิ่มเป้าหมาย
+      </button>
+      <button onclick="syncGoals()" id="sync-btn" class="text-white rounded-xl px-4 py-3 font-medium flex items-center gap-2 shadow-sm" style="background:var(--primary)">
+        <i class="fas fa-sync-alt"></i><span class="text-sm">อัปเดต</span>
+      </button>
+    </div>
 
     <!-- Filter tabs -->
     <div class="flex gap-2">
@@ -80,6 +85,7 @@
             <option value="emergency_fund">🛡 กองทุนฉุกเฉิน</option>
             <option value="investment">📈 การลงทุน</option>
             <option value="debt_payoff">💳 ปิดหนี้</option>
+            <option value="monthly_cashflow">💵 Cashflow รายเดือน</option>
             <option value="other">🎯 อื่นๆ</option>
           </select>
         </div>
