@@ -10,12 +10,11 @@ let cachedAccounts = [];
 const INCOME_CATS = ['เงินเดือน','Freelance/งานพิเศษ','รายได้เช่า','ปันผล/กองทุน','ขายของ/บริการ','รายได้อื่นๆ'];
 const EXPENSE_CATS = ['อาหาร/เครื่องดื่ม','เดินทาง/น้ำมัน','ที่พัก/บ้าน','สุขภาพ','บันเทิง','ช้อปปิ้ง','ค่าประกัน','ออม/ลงทุน','หนี้/ผ่อน','อื่นๆ'];
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
   updateMonthLabel();
   loadTransactions();
   setWalletFilter('all');
-  try { cachedAccounts = await API.getAccounts(); } catch (e) { cachedAccounts = []; }
 });
 
 function updateMonthLabel() {
@@ -139,7 +138,7 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: '2-digit' });
 }
 
-function openModal() {
+async function openModal() {
   currentType = 'income';
   setType('income');
   document.getElementById('tx-amount').value = '';
@@ -148,12 +147,25 @@ function openModal() {
   document.getElementById('tx-wallet').value = 'personal';
 
   const accSel = document.getElementById('tx-account');
-  const ACC_TYPE_EMOJI = { bank: '🏦', savings: '💰', cash: '💵', credit_card: '💳' };
-  accSel.innerHTML = '<option value="">-- ไม่ระบุบัญชี --</option>' +
-    cachedAccounts.map(a => `<option value="${a.id}">${ACC_TYPE_EMOJI[a.type] || '🏦'} ${a.name}</option>`).join('');
+  accSel.innerHTML = '<option value="">กำลังโหลดบัญชี...</option>';
+  accSel.disabled = true;
 
   document.getElementById('modal').classList.remove('hidden');
   setTimeout(() => document.getElementById('tx-amount').focus(), 150);
+
+  const ACC_TYPE_EMOJI = { bank: '🏦', savings: '💰', cash: '💵', credit_card: '💳' };
+  try {
+    cachedAccounts = await API.getAccounts();
+  } catch (e) {
+    cachedAccounts = [];
+  }
+  accSel.disabled = false;
+  if (!cachedAccounts.length) {
+    accSel.innerHTML = '<option value="">-- ยังไม่มีบัญชี (เพิ่มใน ตั้งค่า) --</option>';
+  } else {
+    accSel.innerHTML = '<option value="">-- ไม่ระบุบัญชี --</option>' +
+      cachedAccounts.map(a => `<option value="${a.id}">${ACC_TYPE_EMOJI[a.type] || '🏦'} ${a.name}</option>`).join('');
+  }
 }
 
 function closeModal() {

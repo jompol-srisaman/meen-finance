@@ -67,14 +67,21 @@ function addTransaction(data) {
 // ── Accounts ──────────────────────────────────────────────────
 
 function getAccounts() {
-  var sheet = getSpreadsheet().getSheetByName('Accounts');
-  if (!sheet) return [];
+  var ss = getSpreadsheet();
+  var sheet = ss.getSheetByName('Accounts');
+  if (!sheet) {
+    sheet = ss.insertSheet('Accounts');
+    sheet.getRange(1, 1, 1, 7).setValues([['id','name','type','balance','wallet','color','notes']]);
+    sheet.getRange(1, 1, 1, 7).setFontWeight('bold').setBackground('#4A90D9').setFontColor('#FFFFFF');
+    sheet.setFrozenRows(1);
+    return [];
+  }
   return sheetToObjects(sheet);
 }
 
 function addAccount(data) {
+  getAccounts(); // ensures sheet exists
   var sheet = getSpreadsheet().getSheetByName('Accounts');
-  if (!sheet) return { error: 'No Accounts sheet' };
   var id = generateId();
   sheet.appendRow([
     id,
