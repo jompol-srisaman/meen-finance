@@ -115,6 +115,18 @@
       </div>
     </div>
 
+    <!-- Accounts -->
+    <p class="sec-label">บัญชีธนาคาร & กระเป๋าเงิน <span id="acc-count" class="text-xs normal-case font-normal opacity-60"></span></p>
+    <div class="s-group">
+      <div id="account-list">
+        <div class="list-item"><span class="s-sub">กำลังโหลด...</span></div>
+      </div>
+      <div class="s-row">
+        <div><p class="s-title">เพิ่มบัญชี</p><p class="s-sub">ธนาคาร / ออมทรัพย์ / เงินสด / บัตรเครดิต</p></div>
+        <button onclick="openModal('account')" class="chip-btn" style="background:var(--primary-light);color:var(--primary)">+ เพิ่ม</button>
+      </div>
+    </div>
+
     <!-- Expense Categories -->
     <p class="sec-label">หมวดหมู่รายจ่าย <span id="exp-count" class="text-xs normal-case font-normal opacity-60"></span></p>
     <div class="s-group">
@@ -190,6 +202,24 @@
       </a>
     </div>
 
+    <!-- FIRE Settings -->
+    <p class="sec-label">FIRE Settings</p>
+    <div class="s-group">
+      <div class="s-row" style="flex-direction:column;align-items:flex-start;gap:0.5rem">
+        <div class="w-full">
+          <p class="s-title">เป้าหมาย Passive Income / เดือน (฿)</p>
+          <p class="s-sub">ถ้าว่าง = ใช้ค่าใช้จ่ายรายเดือนเป็นเป้าหมาย</p>
+          <input type="number" id="fire-target" inputmode="decimal" placeholder="ว่าง = ใช้ค่าใช้จ่ายจริง" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none mt-1">
+        </div>
+        <div class="w-full">
+          <p class="s-title">Safe Withdrawal Rate (%)</p>
+          <p class="s-sub">4% = 25× rule (Trinity Study), 3% = conservative</p>
+          <input type="number" id="fire-swr" inputmode="decimal" placeholder="4" class="app-input w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none mt-1">
+        </div>
+        <button onclick="saveFireSettings()" class="chip-btn w-full text-center py-2 rounded-xl text-white" style="background:var(--primary)">บันทึก FIRE Settings</button>
+      </div>
+    </div>
+
     <!-- About -->
     <p class="sec-label">เกี่ยวกับ</p>
     <div class="s-group">
@@ -236,6 +266,28 @@
         <div><label class="field-label">จำนวน/เดือน (฿)</label><input type="number" id="inc-amount" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
       </div>
       <div class="modal-footer"><button onclick="saveIncomeSrc()" style="background-color:var(--primary)">บันทึก</button></div>
+    </div>
+  </div>
+
+  <!-- Account Modal -->
+  <div id="modal-account" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header"><h2>เพิ่มบัญชี</h2><button onclick="closeAllModals()">✕</button></div>
+      <div class="modal-body">
+        <div><label class="field-label">ชื่อบัญชี</label><input type="text" id="acc-name" placeholder="เช่น ออมทรัพย์ KBank" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">ประเภท</label><select id="acc-type" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          <option value="bank">🏦 บัญชีธนาคาร</option>
+          <option value="savings">💰 บัญชีออมทรัพย์</option>
+          <option value="cash">💵 เงินสด</option>
+          <option value="credit_card">💳 บัตรเครดิต (หนี้สิน)</option>
+        </select></div>
+        <div><label class="field-label">ยอดคงเหลือปัจจุบัน (฿)</label><input type="number" id="acc-balance" inputmode="decimal" placeholder="0" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none"></div>
+        <div><label class="field-label">กระเป๋าเงิน</label><select id="acc-wallet" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+          <option value="personal">👤 ส่วนตัว</option>
+          <option value="family">👨‍👩‍👧 ครอบครัว</option>
+        </select></div>
+      </div>
+      <div class="modal-footer"><button onclick="saveAccount()" style="background-color:var(--primary)">บันทึก</button></div>
     </div>
   </div>
 

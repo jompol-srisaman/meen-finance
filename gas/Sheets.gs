@@ -38,15 +38,79 @@ function getTransactions(month, year) {
 
 function addTransaction(data) {
   const sheet = getSpreadsheet().getSheetByName('Transactions');
+  const amount = parseFloat(data.amount) || 0;
   sheet.appendRow([
     data.date || new Date().toISOString().split('T')[0],
     data.type,
     data.category,
-    parseFloat(data.amount) || 0,
+    amount,
     data.description || '',
-    data.wallet || 'personal'
+    data.wallet || 'personal',
+    data.account_id || ''
   ]);
+  // Auto-update account balance
+  if (data.account_id) {
+    var acc = getAccounts().filter(function(a) { return a.id == data.account_id; })[0];
+    if (acc) {
+      var delta;
+      if (acc.type === 'credit_card') {
+        delta = data.type === 'expense' ? amount : -amount;
+      } else {
+        delta = data.type === 'income' ? amount : -amount;
+      }
+      updateAccountBalance(data.account_id, delta);
+    }
+  }
   return { success: true };
+}
+
+// ── Accounts ──────────────────────────────────────────────────
+
+function getAccounts() {
+  var sheet = getSpreadsheet().getSheetByName('Accounts');
+  if (!sheet) return [];
+  return sheetToObjects(sheet);
+}
+
+function addAccount(data) {
+  var sheet = getSpreadsheet().getSheetByName('Accounts');
+  if (!sheet) return { error: 'No Accounts sheet' };
+  var id = generateId();
+  sheet.appendRow([
+    id,
+    data.name,
+    data.type || 'bank',
+    parseFloat(data.balance) || 0,
+    data.wallet || 'personal',
+    data.color || '#3b82f6',
+    data.notes || ''
+  ]);
+  return { success: true, id: id };
+}
+
+function updateAccount(data) {
+  return updateRowById(getSpreadsheet().getSheetByName('Accounts'), data);
+}
+
+function deleteAccount(id) {
+  return deleteRowById(getSpreadsheet().getSheetByName('Accounts'), id);
+}
+
+function updateAccountBalance(id, delta) {
+  var sheet = getSpreadsheet().getSheetByName('Accounts');
+  if (!sheet) return { error: 'No Accounts sheet' };
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var idCol = headers.indexOf('id');
+  var balCol = headers.indexOf('balance');
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][idCol] == id) {
+      var newBal = (parseFloat(data[i][balCol]) || 0) + delta;
+      sheet.getRange(i + 1, balCol + 1).setValue(newBal);
+      return { success: true, newBalance: newBal };
+    }
+  }
+  return { error: 'Account not found' };
 }
 
 // ── Assets ────────────────────────────────────────────────────
@@ -384,17 +448,144 @@ function getIncomeStatement(month, year) {
 }
 
 function getBalanceSheet() {
-  const assets = getAssets();
-  const liabilities = getLiabilities();
-  const totalAssets = assets.reduce(function(sum, a) { return sum + (parseFloat(a.value) || 0); }, 0);
-  const totalLiabilities = liabilities.reduce(function(sum, l) { return sum + (parseFloat(l.balance) || 0); }, 0);
+  var assets = getAssets();
+  var liabilities = getLiabilities();
+  var accounts = getAccounts();
+
+  var accountAssets = accounts
+    .filter(function(a) { return a.type !== 'credit_card'; })
+    .reduce(function(s, a) { return s + (parseFloat(a.balance) || 0); }, 0);
+  var accountLiabs = accounts
+    .filter(function(a) { return a.type === 'credit_card'; })
+    .reduce(function(s, a) { return s + (parseFloat(a.balance) || 0); }, 0);
+
+  var totalAssets = assets.reduce(function(sum, a) { return sum + (parseFloat(a.value) || 0); }, 0) + accountAssets;
+  var totalLiabilities = liabilities.reduce(function(sum, l) { return sum + (parseFloat(l.balance) || 0); }, 0) + accountLiabs;
   return {
     totalAssets: totalAssets,
     totalLiabilities: totalLiabilities,
     netWorth: totalAssets - totalLiabilities,
     assets: assets,
-    liabilities: liabilities
+    liabilities: liabilities,
+    accounts: accounts
   };
+}
+
+function getBudgetActual(month, year) {
+  var categories = getExpenseCategories();
+  var txs = getTransactions(month, year);
+  var expenses = txs.filter(function(t) { return t.type === 'expense'; });
+
+  var actualByName = {};
+  expenses.forEach(function(t) {
+    var cat = t.category || 'อื่นๆ';
+    actualByName[cat] = (actualByName[cat] || 0) + (parseFloat(t.amount) || 0);
+  });
+
+  var result = categories.map(function(c) {
+    var budget = parseFloat(c.monthly_budget) || 0;
+    var actual = actualByName[c.name] || 0;
+    return { id: c.id, name: c.name, type: c.type, budget: budget, actual: actual,
+             variance: budget - actual, pct: budget > 0 ? Math.round((actual / budget) * 100) : null };
+  });
+
+  var budgetNames = categories.map(function(c) { return c.name; });
+  Object.keys(actualByName).forEach(function(name) {
+    if (budgetNames.indexOf(name) < 0) {
+      result.push({ id: null, name: name, type: 'other', budget: 0,
+                    actual: actualByName[name], variance: -actualByName[name], pct: null });
+    }
+  });
+
+  return {
+    items: result,
+    totalBudget: result.reduce(function(s, r) { return s + r.budget; }, 0),
+    totalActual: result.reduce(function(s, r) { return s + r.actual; }, 0),
+    totalVariance: result.reduce(function(s, r) { return s + r.variance; }, 0)
+  };
+}
+
+function getFIRENumber() {
+  var settings = getSettings();
+  var stmt = getIncomeStatement();
+  var assets = getAssets();
+
+  var monthlyExpenses = stmt.expenses.total;
+  var swr = parseFloat(settings.fire_swr) || 4;
+  var fireNumber = (monthlyExpenses * 12) / (swr / 100);
+  var targetMonthly = parseFloat(settings.fire_target_monthly) || monthlyExpenses;
+
+  var passiveAssets = assets
+    .filter(function(a) { return ['stocks','real_estate','business'].indexOf(a.category) >= 0; })
+    .reduce(function(s, a) { return s + (parseFloat(a.value) || 0); }, 0);
+
+  var passiveIncome = stmt.income.passive + stmt.income.portfolio;
+  var progress = fireNumber > 0 ? Math.min((passiveAssets / fireNumber) * 100, 100) : 0;
+
+  return {
+    fireNumber: fireNumber,
+    annualExpenses: monthlyExpenses * 12,
+    monthlyExpenses: monthlyExpenses,
+    targetMonthlyPassive: targetMonthly,
+    currentPassiveIncome: passiveIncome,
+    currentPassiveAssets: passiveAssets,
+    swr: swr,
+    progress: Math.round(progress * 10) / 10,
+    shortfall: Math.max(0, fireNumber - passiveAssets),
+    incomeGap: Math.max(0, targetMonthly - passiveIncome)
+  };
+}
+
+function recordNetWorthSnapshot() {
+  var bs = getBalanceSheet();
+  var now = new Date();
+  var key = 'networth_' + now.getFullYear() + '_' + String(now.getMonth() + 1).padStart(2, '0');
+  var value = JSON.stringify({
+    netWorth: bs.netWorth,
+    assets: bs.totalAssets,
+    liabilities: bs.totalLiabilities,
+    date: now.toISOString().split('T')[0]
+  });
+  var sheet = getSpreadsheet().getSheetByName('Settings');
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === key) {
+      sheet.getRange(i + 1, 2).setValue(value);
+      return { success: true, key: key };
+    }
+  }
+  sheet.appendRow([key, value]);
+  return { success: true, key: key };
+}
+
+function getNetWorthHistory() {
+  var settings = getSettings();
+  var history = [];
+  Object.keys(settings).forEach(function(k) {
+    if (k.indexOf('networth_') === 0) {
+      try { history.push(JSON.parse(settings[k])); } catch(e) {}
+    }
+  });
+  history.sort(function(a, b) { return a.date > b.date ? 1 : -1; });
+  return history;
+}
+
+function saveFireSettings(data) {
+  var sheet = getSpreadsheet().getSheetByName('Settings');
+  if (!sheet) return { error: 'No Settings sheet' };
+  var rows = sheet.getDataRange().getValues();
+  var toSet = { fire_target_monthly: data.fire_target_monthly || '', fire_swr: data.fire_swr || '4' };
+  Object.keys(toSet).forEach(function(key) {
+    var found = false;
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === key) {
+        sheet.getRange(i + 1, 2).setValue(toSet[key]);
+        found = true; break;
+      }
+    }
+    if (!found) sheet.appendRow([key, toSet[key]]);
+  });
+  return { success: true };
 }
 
 function getFreedomMeter() {

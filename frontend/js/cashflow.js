@@ -4,7 +4,7 @@ let currentMilestones = [];
 let currentRatio = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await Promise.all([loadFreedomMeter(), loadIncomeStatement(), loadBalanceSheet(), loadLadder()]);
+  await Promise.all([loadFreedomMeter(), loadIncomeStatement(), loadBalanceSheet(), loadLadder(), loadFIRENumber()]);
   renderLadder();
 });
 
@@ -40,8 +40,51 @@ async function loadFreedomMeter() {
       statusSub.className = 'text-sm mt-1 text-red-500';
       statusSub.textContent = `ต้องการ passive income เพิ่ม ${formatMoney(needed)} / เดือน`;
     }
+
+    // Freedom Ratio formula transparency
+    const formulaEl = document.getElementById('freedom-formula');
+    if (formulaEl) {
+      formulaEl.textContent = `${formatMoney(data.passiveIncome)} ÷ ${formatMoney(data.totalExpenses)} = ${(data.ratio || 0).toFixed(1)}%`;
+    }
   } catch (e) {
     console.error(e);
+  }
+}
+
+// ── FIRE Number ───────────────────────────────────────────────
+
+async function loadFIRENumber() {
+  const el = document.getElementById('fire-card-content');
+  if (!el) return;
+  try {
+    const d = await API.getFIRENumber();
+    const passiveAssets = d.currentPassiveAssets || 0;
+    const progress = d.fireNumber > 0 ? Math.min((passiveAssets / d.fireNumber) * 100, 100) : 0;
+    el.innerHTML = `
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="rounded-xl p-3" style="background:#eff6ff">
+          <p class="text-xs text-blue-500">FIRE Number</p>
+          <p class="text-blue-700 font-bold text-lg mt-1">${formatMoney(d.fireNumber)}</p>
+        </div>
+        <div class="rounded-xl p-3" style="background:#f0fdf4">
+          <p class="text-xs text-green-500">Passive Assets ตอนนี้</p>
+          <p class="text-green-700 font-bold text-lg mt-1">${formatMoney(passiveAssets)}</p>
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="flex justify-between text-xs mb-1" style="color:#6b7280">
+          <span>Progress to FIRE</span>
+          <span class="font-semibold">${progress.toFixed(1)}%</span>
+        </div>
+        <div class="w-full rounded-full h-3 overflow-hidden" style="background:#e5e7eb">
+          <div class="h-3 rounded-full transition-all duration-700" style="width:${progress}%;background:linear-gradient(to right,#f59e0b,#f97316)"></div>
+        </div>
+      </div>
+      <p class="text-xs text-center mt-2" style="color:#9ca3af">
+        ${formatMoney(d.monthlyExpenses)}/เดือน × 12 ÷ ${d.swr}% SWR = ${formatMoney(d.fireNumber)}
+      </p>`;
+  } catch (e) {
+    el.innerHTML = '<p class="text-xs text-center py-4" style="color:#9ca3af">โหลดข้อมูลไม่ได้ — ตรวจสอบการตั้งค่า</p>';
   }
 }
 

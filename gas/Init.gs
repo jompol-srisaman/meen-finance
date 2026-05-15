@@ -5,7 +5,11 @@ function createSheets() {
   const sheetsConfig = [
     {
       name: 'Transactions',
-      headers: ['date', 'type', 'category', 'amount', 'description', 'wallet']
+      headers: ['date', 'type', 'category', 'amount', 'description', 'wallet', 'account_id']
+    },
+    {
+      name: 'Accounts',
+      headers: ['id', 'name', 'type', 'balance', 'wallet', 'color', 'notes']
     },
     {
       name: 'Assets',
@@ -60,7 +64,7 @@ function createSheets() {
     ['version', '2.0']
   ]);
 
-  Logger.log('Sheets created successfully (v2 schema with wallet + Insurance).');
+  Logger.log('Sheets created successfully (v3 schema with Accounts).');
 }
 
 // Run this after createSheets() to populate sample data
@@ -134,6 +138,15 @@ function seedSampleData() {
     [generateId(), 'ออมดาวน์รถ',               'savings',        150000, 35000,  '2027-06-30', 'active',    'family',   ''],
   ];
   goalData.forEach(function(row) { goalSheet.appendRow(row); });
+
+  // ── Accounts ──────────────────────────────────────────────
+  const accSheet = ss.getSheetByName('Accounts');
+  const accData = [
+    [generateId(), 'บัญชีออมทรัพย์ KBank',  'savings',     120000, 'personal', '#22c55e', ''],
+    [generateId(), 'กระเป๋าเงินสด',           'cash',        8000,   'personal', '#f59e0b', ''],
+    [generateId(), 'บัตรเครดิต KBank',        'credit_card', 15000,  'personal', '#ef4444', 'ยอดหนี้ปัจจุบัน'],
+  ];
+  accData.forEach(function(row) { accSheet.appendRow(row); });
 
   // ── Insurance ─────────────────────────────────────────────
   const insSheet = ss.getSheetByName('Insurance');

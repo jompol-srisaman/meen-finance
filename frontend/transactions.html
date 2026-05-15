@@ -50,9 +50,25 @@
       <button id="wf-family" onclick="setWalletFilter('family')" class="px-3 py-1 rounded-full text-xs font-medium border">👨‍👩‍👧 ครอบครัว</button>
     </div>
 
-    <button onclick="openModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 shadow-sm" style="background-color:var(--primary)">
-      <i class="fas fa-plus"></i> เพิ่มรายการใหม่
-    </button>
+    <!-- Tab Bar -->
+    <div class="flex gap-2 rounded-xl p-1" style="background:var(--divider)">
+      <button id="tab-txlist" onclick="setTab('list')" class="flex-1 py-2 rounded-lg text-sm font-medium transition-all" style="background:var(--card);color:var(--primary)">รายการ</button>
+      <button id="tab-budget" onclick="setTab('budget')" class="flex-1 py-2 rounded-lg text-sm font-medium transition-all" style="color:var(--text-muted)">งบประมาณ</button>
+    </div>
+
+    <!-- List view -->
+    <div id="view-list">
+      <button onclick="openModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 shadow-sm" style="background-color:var(--primary)">
+        <i class="fas fa-plus"></i> เพิ่มรายการใหม่
+      </button>
+    </div>
+
+    <!-- Budget vs Actual view -->
+    <div id="view-budget" class="hidden">
+      <div id="budget-list">
+        <div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color:var(--primary)"></div></div>
+      </div>
+    </div>
 
     <div id="tx-list">
       <div class="flex justify-center p-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color:var(--primary)"></div></div>
@@ -95,6 +111,13 @@
           <select id="tx-wallet" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
             <option value="personal">👤 ส่วนตัว</option>
             <option value="family">👨‍👩‍👧 ครอบครัว</option>
+          </select>
+        </div>
+        <!-- Account -->
+        <div>
+          <label class="field-label">บัญชี (ไม่บังคับ)</label>
+          <select id="tx-account" class="app-input w-full border rounded-xl px-4 py-3 focus:outline-none">
+            <option value="">-- ไม่ระบุบัญชี --</option>
           </select>
         </div>
         <!-- Date -->

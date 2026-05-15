@@ -19,6 +19,11 @@ function doGet(e) {
     switch (action) {
       case 'getTransactions':       result = getTransactions(params.month, params.year); break;
       case 'addTransaction':        result = addTransaction(body); break;
+      case 'getAccounts':           result = getAccounts(); break;
+      case 'addAccount':            result = addAccount(body); break;
+      case 'updateAccount':         result = updateAccount(body); break;
+      case 'deleteAccount':         result = deleteAccount(body.id); break;
+      case 'updateAccountBalance':  result = updateAccountBalance(body.id, body.delta); break;
       case 'getAssets':             result = getAssets(); break;
       case 'addAsset':              result = addAsset(body); break;
       case 'updateAsset':           result = updateAsset(body); break;
@@ -47,10 +52,15 @@ function doGet(e) {
       case 'getBalanceSheet':       result = getBalanceSheet(); break;
       case 'getFreedomMeter':       result = getFreedomMeter(); break;
       case 'getSettings':           result = getSettings(); break;
-      case 'getMilestones':         result = getMilestones(); break;
-      case 'saveMilestones':        result = saveMilestones(body.milestones); break;
-      case 'syncGoalsProgress':     result = syncGoalsProgress(); break;
-      case 'initSheets':            createSheets(); result = { success: true }; break;
+      case 'getMilestones':           result = getMilestones(); break;
+      case 'saveMilestones':         result = saveMilestones(body.milestones); break;
+      case 'syncGoalsProgress':      result = syncGoalsProgress(); break;
+      case 'getBudgetActual':        result = getBudgetActual(params.month, params.year); break;
+      case 'getFIRENumber':          result = getFIRENumber(); break;
+      case 'recordNetWorthSnapshot': result = recordNetWorthSnapshot(); break;
+      case 'getNetWorthHistory':     result = getNetWorthHistory(); break;
+      case 'saveFireSettings':       result = saveFireSettings(body); break;
+      case 'initSheets':             createSheets(); result = { success: true }; break;
       default: return jsonResponse({ error: 'Unknown action: ' + action });
     }
     return jsonResponse(result);

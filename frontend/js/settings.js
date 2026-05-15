@@ -4,8 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProfileName();
   applyLangButtons();
   highlightTheme(localStorage.getItem('theme') || 'sky');
+  loadAccounts();
   loadExpenseCategories();
   loadIncomeSources();
+  loadFireSettings();
 });
 
 // ── Profile ───────────────────────────────────────────────────
@@ -247,4 +249,88 @@ function showToast(msg) {
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2200);
+}
+
+// ── Accounts ──────────────────────────────────────────────────
+
+const ACC_TYPE_LABEL = { bank: '🏦 ธนาคาร', savings: '💰 ออมทรัพย์', cash: '💵 เงินสด', credit_card: '💳 เครดิต' };
+const ACC_TYPE_COLOR = { bank: '#3b82f6', savings: '#22c55e', cash: '#f59e0b', credit_card: '#ef4444' };
+
+async function loadAccounts() {
+  const list = document.getElementById('account-list');
+  const count = document.getElementById('acc-count');
+  try {
+    const accounts = await API.getAccounts();
+    if (count) count.textContent = accounts.length ? `(${accounts.length})` : '';
+    if (!accounts.length) {
+      list.innerHTML = '<div class="list-item"><span class="s-sub" style="color:var(--text-sub)">ยังไม่มีบัญชี</span></div>';
+      return;
+    }
+    list.innerHTML = accounts.map(a => {
+      const isCredit = a.type === 'credit_card';
+      const bal = parseFloat(a.balance) || 0;
+      const color = ACC_TYPE_COLOR[a.type] || '#3b82f6';
+      return `
+      <div class="list-item" id="acc-row-${a.id}">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <div class="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-sm" style="background:${color}">${a.type === 'credit_card' ? '💳' : a.type === 'cash' ? '💵' : a.type === 'savings' ? '💰' : '🏦'}</div>
+          <div class="min-w-0">
+            <p class="s-title truncate">${a.name}</p>
+            <p class="s-sub">${ACC_TYPE_LABEL[a.type] || a.type} · <span class="${isCredit ? 'text-red-500' : 'text-green-600'} font-medium">${isCredit ? '-' : ''}${formatMoney(bal)}</span></p>
+          </div>
+        </div>
+        <button class="del-btn" onclick="deleteAcc('${a.id}')"><i class="fas fa-trash-alt"></i></button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="list-item"><span class="s-sub text-red-400">โหลดไม่สำเร็จ</span></div>';
+  }
+}
+
+async function deleteAcc(id) {
+  if (!confirm('ลบบัญชีนี้?')) return;
+  try {
+    await API.deleteAccount(id);
+    document.getElementById('acc-row-' + id)?.remove();
+    showToast('ลบบัญชีแล้ว ✅');
+    loadAccounts();
+  } catch (e) { showToast('ลบไม่สำเร็จ'); }
+}
+
+async function saveAccount() {
+  const name = document.getElementById('acc-name').value.trim();
+  const balance = parseFloat(document.getElementById('acc-balance').value) || 0;
+  if (!name) { showToast('กรุณาใส่ชื่อบัญชี'); return; }
+  const btn = document.querySelector('#modal-account .modal-footer button');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  try {
+    await API.addAccount({ name, type: document.getElementById('acc-type').value, balance, wallet: document.getElementById('acc-wallet').value });
+    closeAllModals();
+    document.getElementById('acc-name').value = '';
+    document.getElementById('acc-balance').value = '';
+    showToast('เพิ่มบัญชีแล้ว ✅');
+    loadAccounts();
+  } catch (e) { showToast('เกิดข้อผิดพลาด'); }
+  btn.disabled = false; btn.textContent = 'บันทึก';
+}
+
+// ── FIRE Settings ─────────────────────────────────────────────
+
+async function loadFireSettings() {
+  try {
+    const s = await API.getSettings();
+    const target = document.getElementById('fire-target');
+    const swr = document.getElementById('fire-swr');
+    if (target && s.fire_target_monthly) target.value = s.fire_target_monthly;
+    if (swr) swr.value = s.fire_swr || '4';
+  } catch (e) {}
+}
+
+async function saveFireSettings() {
+  const target = parseFloat(document.getElementById('fire-target').value) || '';
+  const swr = parseFloat(document.getElementById('fire-swr').value) || 4;
+  try {
+    await API.saveFireSettings({ fire_target_monthly: target, fire_swr: swr });
+    showToast('บันทึก FIRE Settings แล้ว ✅');
+  } catch (e) { showToast('บันทึกไม่สำเร็จ'); }
 }

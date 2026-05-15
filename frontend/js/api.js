@@ -24,6 +24,11 @@ async function apiPost(action, data = {}) {
 const API = {
   getTransactions:       (month, year) => apiGet('getTransactions', { month, year }),
   addTransaction:        (data) => apiPost('addTransaction', data),
+  getAccounts:           () => apiGet('getAccounts'),
+  addAccount:            (data) => apiPost('addAccount', data),
+  updateAccount:         (data) => apiPost('updateAccount', data),
+  deleteAccount:         (id) => apiPost('deleteAccount', { id }),
+  updateAccountBalance:  (id, delta) => apiPost('updateAccountBalance', { id, delta }),
   getAssets:             () => apiGet('getAssets'),
   addAsset:              (data) => apiPost('addAsset', data),
   updateAsset:           (data) => apiPost('updateAsset', data),
@@ -52,9 +57,14 @@ const API = {
   getBalanceSheet:       () => apiGet('getBalanceSheet'),
   getFreedomMeter:       () => apiGet('getFreedomMeter'),
   getSettings:           () => apiGet('getSettings'),
-  getMilestones:         () => apiGet('getMilestones'),
-  saveMilestones:        (milestones) => apiPost('saveMilestones', { milestones }),
-  syncGoalsProgress:     () => apiGet('syncGoalsProgress'),
+  getMilestones:           () => apiGet('getMilestones'),
+  saveMilestones:          (milestones) => apiPost('saveMilestones', { milestones }),
+  syncGoalsProgress:       () => apiGet('syncGoalsProgress'),
+  getBudgetActual:         (month, year) => apiGet('getBudgetActual', { month, year }),
+  getFIRENumber:           () => apiGet('getFIRENumber'),
+  recordNetWorthSnapshot:  () => apiGet('recordNetWorthSnapshot'),
+  getNetWorthHistory:      () => apiGet('getNetWorthHistory'),
+  saveFireSettings:        (data) => apiPost('saveFireSettings', data),
 };
 
 function showLoading(el) {

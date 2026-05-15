@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const greet = hour < 12 ? 'อรุณสวัสดิ์ ☀️' : hour < 18 ? 'สวัสดีตอนบ่าย 🌤' : 'สวัสดีตอนเย็น 🌙';
   setEl('greeting', greet);
 
-  await Promise.all([loadBalanceSheet(), loadFreedomMeter(), loadIncomeChart(), loadRecentTransactions()]);
+  await Promise.all([loadBalanceSheet(), loadFreedomMeter(), loadIncomeChart(), loadRecentTransactions(), loadSavingsRate()]);
 });
 
 async function loadBalanceSheet() {
@@ -113,6 +113,40 @@ async function loadIncomeChart() {
     });
   } catch (e) {
     console.error('loadIncomeChart:', e);
+  }
+}
+
+async function loadSavingsRate() {
+  const pctEl = document.getElementById('savings-rate-pct');
+  const descEl = document.getElementById('savings-rate-desc');
+  const badgeEl = document.getElementById('savings-badge');
+  if (!pctEl) return;
+  try {
+    const now = new Date();
+    const txs = await API.getTransactions(now.getMonth() + 1, now.getFullYear());
+    let income = 0, expense = 0;
+    txs.forEach(t => {
+      const amt = parseFloat(t.amount) || 0;
+      if (t.type === 'income') income += amt;
+      else expense += amt;
+    });
+    if (!income) {
+      pctEl.textContent = '—';
+      if (descEl) descEl.textContent = 'ยังไม่มีรายรับเดือนนี้';
+      return;
+    }
+    const rate = ((income - expense) / income) * 100;
+    pctEl.textContent = rate.toFixed(1) + '%';
+    pctEl.style.color = rate >= 20 ? '#16a34a' : rate >= 10 ? '#d97706' : '#dc2626';
+    if (descEl) descEl.textContent = `เซฟ ${formatMoney(income - expense)} จาก ${formatMoney(income)}`;
+    if (badgeEl) {
+      if (rate >= 50)       { badgeEl.textContent = '🏆 FIRE Track'; badgeEl.style.cssText = 'background:#dcfce7;color:#15803d'; }
+      else if (rate >= 20)  { badgeEl.textContent = '🟢 ดี';         badgeEl.style.cssText = 'background:#dcfce7;color:#15803d'; }
+      else if (rate >= 10)  { badgeEl.textContent = '🟡 พอได้';     badgeEl.style.cssText = 'background:#fef9c3;color:#92400e'; }
+      else                   { badgeEl.textContent = '🔴 อันตราย';  badgeEl.style.cssText = 'background:#fee2e2;color:#b91c1c'; }
+    }
+  } catch (e) {
+    if (pctEl) pctEl.textContent = '—';
   }
 }
 
