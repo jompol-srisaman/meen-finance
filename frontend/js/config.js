@@ -1,6 +1,6 @@
 // config.js — Replace these values after deploying GAS
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxXt6SBka2oa0_4uUQD6_uwiI-DIGcIWSd_rcbuMNHHp4HXTBmYv26rmesXdju5SDpz/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxhJifsXl81LZZRRHzBJR_K5fvbV664C8GUsTqak-abFV5Hb9I63tHF-sSgNY-CIDg2/exec';
 const API_KEY = '3080759533cd0cdc02401db6803306168f874e4772ada356';
 
 const LANG = {
