@@ -2,8 +2,9 @@
 
 const SHEET_ID = '1ZpiHavAZOm_-j1_pvJ_w_jN_A2-gPnKOPRFHwr597yc';
 
+var _ss = null;
 function getSpreadsheet() {
-  return SpreadsheetApp.openById(SHEET_ID);
+  return _ss || (_ss = SpreadsheetApp.openById(SHEET_ID));
 }
 
 function sheetToObjects(sheet) {
@@ -124,6 +125,7 @@ function updateAccountBalance(id, delta) {
 
 function getAssets() {
   const sheet = getSpreadsheet().getSheetByName('Assets');
+  if (!sheet) return [];
   return sheetToObjects(sheet);
 }
 
@@ -155,6 +157,7 @@ function deleteAsset(id) {
 
 function getLiabilities() {
   const sheet = getSpreadsheet().getSheetByName('Liabilities');
+  if (!sheet) return [];
   return sheetToObjects(sheet);
 }
 
@@ -186,6 +189,7 @@ function deleteLiability(id) {
 
 function getIncomeSources() {
   const sheet = getSpreadsheet().getSheetByName('Income_Sources');
+  if (!sheet) return [];
   return sheetToObjects(sheet);
 }
 
@@ -214,6 +218,7 @@ function deleteIncomeSource(id) {
 
 function getExpenseCategories() {
   const sheet = getSpreadsheet().getSheetByName('Expense_Categories');
+  if (!sheet) return [];
   return sheetToObjects(sheet);
 }
 
@@ -232,6 +237,7 @@ function deleteExpenseCategory(id) {
 
 function getGoals() {
   const sheet = getSpreadsheet().getSheetByName('Goals');
+  if (!sheet) return [];
   return sheetToObjects(sheet);
 }
 
@@ -264,6 +270,7 @@ function deleteGoal(id) {
 
 function getInsurance() {
   const sheet = getSpreadsheet().getSheetByName('Insurance');
+  if (!sheet) return [];
   return sheetToObjects(sheet);
 }
 
@@ -315,6 +322,7 @@ function getInsuranceSummary() {
 
 function getSettings() {
   const sheet = getSpreadsheet().getSheetByName('Settings');
+  if (!sheet) return {};
   const rows = sheetToObjects(sheet);
   const settings = {};
   rows.forEach(function(r) { settings[r.key] = r.value; });
@@ -604,7 +612,7 @@ function getFreedomMeter() {
     passiveIncome: passiveIncome,
     totalExpenses: totalExpenses,
     ratio: Math.round(ratio * 10) / 10,
-    status: ratio >= 100 ? 'fast_track' : 'rat_race'
+    status: ratio >= 100 ? 'financial_freedom' : ratio >= 50 ? 'fast_track' : 'rat_race'
   };
 }
 
@@ -618,15 +626,29 @@ function updateRowById(sheet, data) {
 
   for (let i = 1; i < values.length; i++) {
     if (values[i][idCol] == data.id) {
+      const row = values[i].slice();
       headers.forEach(function(h, j) {
-        if (data[h] !== undefined) {
-          sheet.getRange(i + 1, j + 1).setValue(data[h]);
-        }
+        if (data[h] !== undefined) row[j] = data[h];
       });
+      sheet.getRange(i + 1, 1, 1, row.length).setValues([row]);
       return { success: true };
     }
   }
   return { success: false, error: 'Row not found' };
+}
+
+// ── Dashboard Aggregate ───────────────────────────────────────
+
+function getDashboard(month, year) {
+  var now = new Date();
+  var m = parseInt(month) || (now.getMonth() + 1);
+  var y = parseInt(year) || now.getFullYear();
+  return {
+    balanceSheet: getBalanceSheet(),
+    freedomMeter: getFreedomMeter(),
+    incomeStatement: getIncomeStatement(m, y),
+    recentTransactions: getTransactions(m, y)
+  };
 }
 
 function deleteRowById(sheet, id) {

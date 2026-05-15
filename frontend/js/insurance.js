@@ -67,9 +67,9 @@ async function loadInsurance() {
     const data = await API.getInsuranceSummary();
     allInsurance = data.list || [];
 
-    document.getElementById('hdr-count').textContent = data.count + ' ฉบับ';
-    document.getElementById('hdr-monthly').textContent = formatMoney(data.totalMonthly);
-    document.getElementById('hdr-annual').textContent = formatMoney(data.totalAnnual);
+    document.getElementById('hdr-count').textContent = (data.count || 0) + ' ฉบับ';
+    document.getElementById('hdr-monthly').textContent = formatMoney(data.totalMonthly || 0);
+    document.getElementById('hdr-annual').textContent = formatMoney(data.totalAnnual || 0);
 
     renderList();
   } catch (e) {

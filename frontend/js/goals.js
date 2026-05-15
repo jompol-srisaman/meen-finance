@@ -285,14 +285,18 @@ async function saveUpdate() {
 }
 
 async function markComplete(id) {
-  await API.updateGoal({ id, status: 'completed' });
-  loadGoals();
+  try {
+    await API.updateGoal({ id, status: 'completed' });
+    loadGoals();
+  } catch (e) { alert('อัพเดทไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 async function deleteGoal(id) {
   if (!confirm('ลบเป้าหมายนี้?')) return;
-  await API.deleteGoal(id);
-  loadGoals();
+  try {
+    await API.deleteGoal(id);
+    loadGoals();
+  } catch (e) { alert('ลบไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 // ── Auto-Sync from Financial Data ────────────────────────────

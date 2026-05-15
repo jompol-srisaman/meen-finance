@@ -4,10 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProfileName();
   applyLangButtons();
   highlightTheme(localStorage.getItem('theme') || 'sky');
-  loadAccounts();
-  loadExpenseCategories();
-  loadIncomeSources();
-  loadFireSettings();
+  Promise.all([loadAccounts(), loadExpenseCategories(), loadIncomeSources(), loadFireSettings()]);
 });
 
 // ── Profile ───────────────────────────────────────────────────
@@ -327,7 +324,7 @@ async function loadFireSettings() {
 }
 
 async function saveFireSettings() {
-  const target = parseFloat(document.getElementById('fire-target').value) || '';
+  const target = parseFloat(document.getElementById('fire-target').value) || 0;
   const swr = parseFloat(document.getElementById('fire-swr').value) || 4;
   try {
     await API.saveFireSettings({ fire_target_monthly: target, fire_swr: swr });

@@ -26,12 +26,18 @@ async function loadFreedomMeter() {
     const statusText = document.getElementById('status-text');
     const statusSub = document.getElementById('status-sub');
 
-    if (data.status === 'fast_track') {
+    if (data.status === 'financial_freedom') {
+      banner.className = 'rounded-2xl p-4 text-center bg-yellow-50';
+      statusText.className = 'text-xl font-bold text-yellow-700';
+      statusText.textContent = 'FINANCIAL FREEDOM 🏆';
+      statusSub.className = 'text-sm mt-1 text-yellow-600';
+      statusSub.textContent = 'คุณบรรลุอิสรภาพทางการเงินแล้ว! 🎉';
+    } else if (data.status === 'fast_track') {
       banner.className = 'rounded-2xl p-4 text-center bg-green-100';
       statusText.className = 'text-xl font-bold text-green-700';
       statusText.textContent = 'FAST TRACK 🚀';
       statusSub.className = 'text-sm mt-1 text-green-600';
-      statusSub.textContent = 'คุณบรรลุอิสรภาพทางการเงินแล้ว! 🎉';
+      statusSub.textContent = 'Passive income เกิน 50% แล้ว ไปได้ดี!';
     } else {
       banner.className = 'rounded-2xl p-4 text-center bg-red-50';
       statusText.className = 'text-xl font-bold text-red-600';
@@ -218,8 +224,8 @@ async function saveLadder() {
 async function loadIncomeStatement() {
   try {
     const stmt = await API.getIncomeStatement();
-    const income = stmt.income;
-    const expenses = stmt.expenses;
+    const income = stmt.income || {};
+    const expenses = stmt.expenses || {};
 
     const incomeRows = [
       { label: 'เงินเดือน', value: income.salary },
@@ -245,8 +251,10 @@ async function loadIncomeStatement() {
 
     const cf = stmt.cashflow || 0;
     const cfEl = document.getElementById('monthly-cf');
-    cfEl.textContent = (cf >= 0 ? '+' : '') + formatMoney(cf);
-    cfEl.className = 'text-xl font-bold ' + (cf >= 0 ? 'positive' : 'negative');
+    if (cfEl) {
+      cfEl.textContent = (cf >= 0 ? '+' : '') + formatMoney(cf);
+      cfEl.className = 'text-xl font-bold ' + (cf >= 0 ? 'positive' : 'negative');
+    }
 
     const ctx = document.getElementById('incomeDonut').getContext('2d');
     new Chart(ctx, {

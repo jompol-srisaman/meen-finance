@@ -126,43 +126,53 @@ async function saveAsset() {
   const name = document.getElementById('a-name').value.trim();
   const value = parseFloat(document.getElementById('a-value').value);
   if (!name || !value) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
-  await API.addAsset({ name, category: document.getElementById('a-category').value, value, monthly_cashflow: document.getElementById('a-cashflow').value || 0 });
-  closeModals();
-  loadAssetsPanel();
-  loadHeader();
+  try {
+    await API.addAsset({ name, category: document.getElementById('a-category').value, value, monthly_cashflow: document.getElementById('a-cashflow').value || 0 });
+    closeModals();
+    loadAssetsPanel();
+    loadHeader();
+  } catch (e) { alert('บันทึกไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 async function saveLiability() {
   const name = document.getElementById('l-name').value.trim();
   const balance = parseFloat(document.getElementById('l-balance').value);
   if (!name || !balance) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
-  await API.addLiability({ name, category: document.getElementById('l-category').value, balance, monthly_payment: document.getElementById('l-payment').value || 0, interest_rate: document.getElementById('l-rate').value || 0 });
-  closeModals();
-  loadLiabilitiesPanel();
-  loadHeader();
+  try {
+    await API.addLiability({ name, category: document.getElementById('l-category').value, balance, monthly_payment: document.getElementById('l-payment').value || 0, interest_rate: document.getElementById('l-rate').value || 0 });
+    closeModals();
+    loadLiabilitiesPanel();
+    loadHeader();
+  } catch (e) { alert('บันทึกไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 async function saveIncomeSource() {
   const name = document.getElementById('i-name').value.trim();
   const amount = parseFloat(document.getElementById('i-amount').value);
   if (!name || !amount) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
-  await API.addIncomeSource({ name, type: document.getElementById('i-type').value, monthly_amount: amount });
-  closeModals();
-  loadIncomePanel();
+  try {
+    await API.addIncomeSource({ name, type: document.getElementById('i-type').value, monthly_amount: amount });
+    closeModals();
+    loadIncomePanel();
+  } catch (e) { alert('บันทึกไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 async function deleteAsset(id) {
   if (!confirm('ลบทรัพย์สินนี้?')) return;
-  await API.deleteAsset(id);
-  loadAssetsPanel();
-  loadHeader();
+  try {
+    await API.deleteAsset(id);
+    loadAssetsPanel();
+    loadHeader();
+  } catch (e) { alert('ลบไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 async function deleteLiability(id) {
   if (!confirm('ลบหนี้สินนี้?')) return;
-  await API.deleteLiability(id);
-  loadLiabilitiesPanel();
-  loadHeader();
+  try {
+    await API.deleteLiability(id);
+    loadLiabilitiesPanel();
+    loadHeader();
+  } catch (e) { alert('ลบไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 function emptyState(msg, icon) {

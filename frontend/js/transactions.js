@@ -70,7 +70,7 @@ async function loadTransactions() {
     let txs = await API.getTransactions(currentMonth, currentYear);
 
     if (currentWalletFilter !== 'all') {
-      txs = txs.filter(t => (t.wallet || t.account || 'personal') === currentWalletFilter);
+      txs = txs.filter(t => (t.wallet || 'personal') === currentWalletFilter);
     }
 
     let incomeSum = 0, expenseSum = 0;

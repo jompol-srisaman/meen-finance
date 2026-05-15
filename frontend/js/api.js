@@ -65,6 +65,7 @@ const API = {
   recordNetWorthSnapshot:  () => apiGet('recordNetWorthSnapshot'),
   getNetWorthHistory:      () => apiGet('getNetWorthHistory'),
   saveFireSettings:        (data) => apiPost('saveFireSettings', data),
+  getDashboard:            (month, year) => apiGet('getDashboard', { month, year }),
 };
 
 function showLoading(el) {
