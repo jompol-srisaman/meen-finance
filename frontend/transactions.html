@@ -58,9 +58,14 @@
 
     <!-- List view -->
     <div id="view-list">
-      <button onclick="openModal()" class="w-full text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 shadow-sm" style="background-color:var(--primary)">
-        <i class="fas fa-plus"></i> เพิ่มรายการใหม่
-      </button>
+      <div class="flex gap-2">
+        <button onclick="openModal()" class="flex-1 text-white rounded-xl py-3 font-medium flex items-center justify-center gap-2 shadow-sm" style="background-color:var(--primary)">
+          <i class="fas fa-plus"></i> เพิ่มรายการใหม่
+        </button>
+        <button onclick="openCsvImport()" class="text-white rounded-xl px-4 py-3 font-medium flex items-center gap-2 shadow-sm" style="background-color:#0891b2" title="นำเข้าจาก CSV">
+          <i class="fas fa-file-import"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Budget vs Actual view -->
@@ -143,9 +148,82 @@
     <a href="settings.html" class="flex flex-col items-center"><i class="fas fa-cog text-xl"></i><span class="text-xs mt-1">ตั้งค่า</span></a>
   </nav>
 
+  <!-- CSV Import Modal -->
+  <div id="csv-modal" class="modal-sheet hidden">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2><i class="fas fa-file-import mr-2" style="color:var(--primary)"></i>นำเข้าจาก CSV</h2>
+        <button onclick="closeCsvModal()">✕</button>
+      </div>
+
+      <!-- Step 1: Upload / Paste -->
+      <div id="csv-step1" class="modal-body">
+        <div class="text-center pb-2">
+          <p class="text-sm" style="color:var(--text-muted)">รองรับ KBank, SCB, KTB, BBL และ CSV ทั่วไป</p>
+        </div>
+
+        <label class="block w-full border-2 border-dashed rounded-xl p-5 text-center cursor-pointer mb-3" style="border-color:var(--divider)">
+          <i class="fas fa-cloud-upload-alt text-2xl mb-2 block" style="color:var(--text-sub)"></i>
+          <span class="text-sm" style="color:var(--text-muted)">แตะเพื่อเลือกไฟล์ .csv</span>
+          <input type="file" id="csv-file" accept=".csv,.txt" class="hidden" onchange="onCsvFileSelect(this)">
+        </label>
+
+        <div class="flex items-center gap-2 mb-3">
+          <div class="flex-1 h-px" style="background:var(--divider)"></div>
+          <span class="text-xs" style="color:var(--text-sub)">หรือวางข้อความ</span>
+          <div class="flex-1 h-px" style="background:var(--divider)"></div>
+        </div>
+
+        <textarea id="csv-paste" rows="6"
+          placeholder="วาง CSV ตรงนี้...&#10;date,description,debit,credit&#10;2025-01-05,ค่าอาหาร,250,&#10;2025-01-05,เงินเดือน,,30000"
+          class="app-input w-full border rounded-xl px-3 py-2 text-xs focus:outline-none"
+          style="font-family:monospace;resize:none"></textarea>
+
+        <button onclick="downloadCsvTemplate()" class="text-xs flex items-center gap-1 mt-2" style="color:var(--primary)">
+          <i class="fas fa-download"></i> ดาวน์โหลด Template
+        </button>
+      </div>
+
+      <!-- Step 2: Preview & Confirm -->
+      <div id="csv-step2" class="modal-body hidden">
+        <div id="csv-detect-info" class="rounded-xl p-3 mb-3 text-xs" style="background:var(--divider);color:var(--text)"></div>
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="field-label">หมวดหมู่ (รายจ่าย)</label>
+            <select id="csv-cat" onchange="reprocessCsv()" class="app-input w-full border rounded-xl px-3 py-2 text-sm focus:outline-none">
+              <option value="อื่นๆ">อื่นๆ</option>
+              <option value="อาหาร/เครื่องดื่ม">อาหาร/เครื่องดื่ม</option>
+              <option value="เดินทาง/น้ำมัน">เดินทาง/น้ำมัน</option>
+              <option value="ที่พัก/บ้าน">ที่พัก/บ้าน</option>
+              <option value="สุขภาพ">สุขภาพ</option>
+              <option value="บันเทิง">บันเทิง</option>
+              <option value="ช้อปปิ้ง">ช้อปปิ้ง</option>
+              <option value="หนี้/ผ่อน">หนี้/ผ่อน</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">กระเป๋าเงิน</label>
+            <select id="csv-wallet" onchange="reprocessCsv()" class="app-input w-full border rounded-xl px-3 py-2 text-sm focus:outline-none">
+              <option value="personal">👤 ส่วนตัว</option>
+              <option value="family">👨‍👩‍👧 ครอบครัว</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="text-xs font-semibold mb-1" style="color:var(--text-sub)">ตัวอย่าง 5 รายการแรก</p>
+        <div id="csv-preview" class="rounded-xl border overflow-hidden mb-2" style="border-color:var(--divider)"></div>
+        <p id="csv-count" class="text-sm font-semibold text-center" style="color:var(--primary)"></p>
+      </div>
+
+      <div class="modal-footer flex gap-2" id="csv-footer"></div>
+    </div>
+  </div>
+
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/transactions.js"></script>
+  <script src="js/csv-import.js"></script>
   <script src="js/nav.js"></script>
 </body>
 </html>

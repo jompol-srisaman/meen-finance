@@ -26,6 +26,7 @@ function generateId() {
 
 function getTransactions(month, year) {
   const sheet = getSpreadsheet().getSheetByName('Transactions');
+  if (!sheet) return [];
   const all = sheetToObjects(sheet);
   if (!month && !year) return all;
   return all.filter(function(t) {
@@ -649,6 +650,28 @@ function getDashboard(month, year) {
     incomeStatement: getIncomeStatement(m, y),
     recentTransactions: getTransactions(m, y)
   };
+}
+
+// ── Batch Import ─────────────────────────────────────────────
+
+function addTransactionsBatch(data) {
+  var sheet = getSpreadsheet().getSheetByName('Transactions');
+  if (!sheet) return { error: 'No Transactions sheet' };
+  var txs = data.transactions || [];
+  if (!txs.length) return { success: true, inserted: 0 };
+  var rows = txs.map(function(tx) {
+    return [
+      tx.date || new Date().toISOString().split('T')[0],
+      tx.type || 'expense',
+      tx.category || 'อื่นๆ',
+      parseFloat(tx.amount) || 0,
+      tx.description || '',
+      tx.wallet || 'personal',
+      tx.account_id || ''
+    ];
+  });
+  sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 7).setValues(rows);
+  return { success: true, inserted: rows.length };
 }
 
 function deleteRowById(sheet, id) {

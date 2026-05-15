@@ -61,6 +61,7 @@ function doGet(e) {
       case 'getNetWorthHistory':     result = getNetWorthHistory(); break;
       case 'saveFireSettings':       result = saveFireSettings(body); break;
       case 'getDashboard':            result = getDashboard(params.month, params.year); break;
+      case 'addTransactionsBatch':   result = addTransactionsBatch(body); break;
       case 'initSheets':             createSheets(); result = { success: true }; break;
       default: return jsonResponse({ error: 'Unknown action: ' + action });
     }

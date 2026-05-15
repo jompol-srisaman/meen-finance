@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderSavingsRate(dash.recentTransactions || []);
   } catch (e) {
     console.error('Dashboard load error:', e);
-    setEl('net-worth', 'Error');
+    setEl('net-worth', '—');
+    const el = document.getElementById('recent-transactions');
+    if (el) el.innerHTML = `<div class="text-center py-4"><p class="text-red-500 text-sm">โหลดข้อมูลไม่สำเร็จ</p><p class="text-xs mt-1" style="color:var(--text-sub)">${e.message}</p></div>`;
   }
 });
 

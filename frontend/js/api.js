@@ -66,6 +66,7 @@ const API = {
   getNetWorthHistory:      () => apiGet('getNetWorthHistory'),
   saveFireSettings:        (data) => apiPost('saveFireSettings', data),
   getDashboard:            (month, year) => apiGet('getDashboard', { month, year }),
+  addTransactionsBatch:    (data) => apiPost('addTransactionsBatch', data),
 };
 
 function showLoading(el) {
