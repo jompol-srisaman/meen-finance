@@ -67,6 +67,9 @@ const API = {
   saveFireSettings:        (data) => apiPost('saveFireSettings', data),
   getDashboard:            (month, year) => apiGet('getDashboard', { month, year }),
   addTransactionsBatch:    (data) => apiPost('addTransactionsBatch', data),
+  updateTransaction:       (data) => apiPost('updateTransaction', data),
+  deleteTransaction:       (data) => apiPost('deleteTransaction', data),
+  updateExpenseCategory:   (data) => apiPost('updateExpenseCategory', data),
 };
 
 function showLoading(el) {

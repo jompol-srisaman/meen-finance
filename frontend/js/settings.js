@@ -84,11 +84,14 @@ async function loadExpenseCategories() {
     const typeLabel = { mortgage:'ผ่อนบ้าน', car_payment:'ผ่อนรถ', credit_card:'บัตรเครดิต', food:'อาหาร', transport:'เดินทาง', tax:'ภาษี', other:'อื่นๆ' };
     list.innerHTML = cats.map(c => `
       <div class="list-item" id="cat-row-${c.id}">
-        <div>
+        <div class="flex-1 min-w-0">
           <p class="s-title">${c.name}</p>
           <p class="s-sub">${typeLabel[c.type] || c.type} · ฿${Number(c.monthly_budget || 0).toLocaleString()}/เดือน</p>
         </div>
-        <button class="del-btn" onclick="deleteExpenseCat('${c.id}')"><i class="fas fa-trash-alt"></i></button>
+        <div class="flex gap-1 flex-shrink-0">
+          <button class="del-btn" style="background:var(--divider);color:var(--text-sub)" onclick='openEditCat(${JSON.stringify(c)})'><i class="fas fa-pen text-xs"></i></button>
+          <button class="del-btn" onclick="deleteExpenseCat('${c.id}')"><i class="fas fa-trash-alt"></i></button>
+        </div>
       </div>`).join('');
   } catch (e) {
     list.innerHTML = '<div class="list-item"><span class="s-sub text-red-400">โหลดไม่สำเร็จ</span></div>';
@@ -107,6 +110,27 @@ async function deleteExpenseCat(id) {
   }
 }
 
+let _editCatId = null;
+
+function openAddCat() {
+  _editCatId = null;
+  document.getElementById('cat-name').value = '';
+  document.getElementById('cat-budget').value = '';
+  const header = document.querySelector('#modal-expense-cat .modal-header h2');
+  if (header) header.textContent = 'เพิ่มหมวดหมู่รายจ่าย';
+  openModal('expense-cat');
+}
+
+function openEditCat(cat) {
+  _editCatId = cat.id;
+  document.getElementById('cat-name').value = cat.name || '';
+  document.getElementById('cat-type').value = cat.type || 'other';
+  document.getElementById('cat-budget').value = cat.monthly_budget || '';
+  const header = document.querySelector('#modal-expense-cat .modal-header h2');
+  if (header) header.textContent = 'แก้ไขหมวดหมู่';
+  openModal('expense-cat');
+}
+
 async function saveExpenseCat() {
   const name = document.getElementById('cat-name').value.trim();
   const budget = parseFloat(document.getElementById('cat-budget').value);
@@ -114,11 +138,18 @@ async function saveExpenseCat() {
   const btn = document.querySelector('#modal-expense-cat .modal-footer button');
   btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
   try {
-    await API.addExpenseCategory({ name, type: document.getElementById('cat-type').value, monthly_budget: budget });
+    const data = { name, type: document.getElementById('cat-type').value, monthly_budget: budget };
+    if (_editCatId) {
+      await API.updateExpenseCategory({ ...data, id: _editCatId });
+      showToast('แก้ไขหมวดหมู่แล้ว ✅');
+    } else {
+      await API.addExpenseCategory(data);
+      showToast('เพิ่มหมวดหมู่แล้ว ✅');
+    }
+    _editCatId = null;
     closeAllModals();
     document.getElementById('cat-name').value = '';
     document.getElementById('cat-budget').value = '';
-    showToast('เพิ่มหมวดหมู่แล้ว ✅');
     loadExpenseCategories();
   } catch (e) {
     showToast('เกิดข้อผิดพลาด ลองใหม่');

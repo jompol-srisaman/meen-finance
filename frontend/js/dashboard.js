@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dash = await API.getDashboard(now.getMonth() + 1, now.getFullYear());
     renderBalanceSheet(dash.balanceSheet || {});
     renderFreedomMeter(dash.freedomMeter || {}, dash.incomeStatement || {});
+    renderNetWorthChart(dash.netWorthHistory || []);
     renderIncomeChart(dash.recentTransactions || []);
     renderRecentTransactions(dash.recentTransactions || []);
     renderSavingsRate(dash.recentTransactions || []);
@@ -81,6 +82,48 @@ function renderFreedomMeter(data, stmt) {
     cfEl.textContent = formatMoney(cf);
     cfEl.className = 'font-semibold ' + (cf >= 0 ? 'text-green-600' : 'text-red-500');
   }
+}
+
+function renderNetWorthChart(history) {
+  const canvas = document.getElementById('netWorthChart');
+  if (!canvas) return;
+  if (!history || history.length < 2) {
+    canvas.parentElement.style.display = 'none';
+    return;
+  }
+  canvas.parentElement.style.display = '';
+  const labels = history.map(h => {
+    const d = new Date(h.date + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  });
+  const values = history.map(h => h.netWorth || 0);
+  const isGrowing = values[values.length - 1] >= values[0];
+  const color = isGrowing ? '#22c55e' : '#ef4444';
+  const ctx = canvas.getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: color,
+        backgroundColor: color + '18',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: color,
+        fill: true,
+        tension: 0.35,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => '฿' + (v / 1000).toLocaleString() + 'k' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
 }
 
 function renderIncomeChart(txs) {

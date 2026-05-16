@@ -62,6 +62,9 @@ function doGet(e) {
       case 'saveFireSettings':       result = saveFireSettings(body); break;
       case 'getDashboard':            result = getDashboard(params.month, params.year); break;
       case 'addTransactionsBatch':   result = addTransactionsBatch(body); break;
+      case 'updateTransaction':      result = updateTransaction(body); break;
+      case 'deleteTransaction':      result = deleteTransaction(body); break;
+      case 'updateExpenseCategory':  result = updateExpenseCategory(body); break;
       case 'initSheets':             createSheets(); result = { success: true }; break;
       default: return jsonResponse({ error: 'Unknown action: ' + action });
     }

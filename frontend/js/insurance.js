@@ -77,29 +77,56 @@ async function loadInsurance() {
   }
 }
 
+function getExpiryStatus(ins) {
+  if (!ins.end_date) return 'ok';
+  const days = daysUntil(ins.end_date);
+  if (days < 0) return 'expired';
+  if (days <= 30) return 'urgent';
+  if (days <= 90) return 'soon';
+  return 'ok';
+}
+
 function renderList() {
   const el = document.getElementById('ins-list');
   let items = allInsurance;
 
-  if (walletFilter !== 'all') {
-    items = items.filter(i => (i.wallet || 'personal') === walletFilter);
-  }
-  if (typeFilter !== 'all') {
-    items = items.filter(i => i.type === typeFilter);
-  }
+  if (walletFilter !== 'all') items = items.filter(i => (i.wallet || 'personal') === walletFilter);
+  if (typeFilter !== 'all') items = items.filter(i => i.type === typeFilter);
 
   if (!items.length) {
     el.innerHTML = `<div class="text-center py-12" style="color:var(--text-sub)"><i class="fas fa-shield-halved text-4xl mb-3 block"></i><p>ยังไม่มีกรมธรรม์</p></div>`;
     return;
   }
 
-  el.innerHTML = items.map(ins => {
+  // Sort: expired/urgent first
+  const statusOrder = { expired: 0, urgent: 1, soon: 2, ok: 3 };
+  items = [...items].sort((a, b) => statusOrder[getExpiryStatus(a)] - statusOrder[getExpiryStatus(b)]);
+
+  // Alert banner
+  const expired = items.filter(i => getExpiryStatus(i) === 'expired');
+  const urgent  = items.filter(i => getExpiryStatus(i) === 'urgent');
+  let banner = '';
+  if (expired.length || urgent.length) {
+    const parts = [];
+    if (expired.length) parts.push(`หมดอายุแล้ว ${expired.length} ฉบับ`);
+    if (urgent.length)  parts.push(`ใกล้หมด ${urgent.length} ฉบับ`);
+    banner = `<div class="rounded-xl p-3 mb-3 flex items-center gap-2 text-sm font-medium" style="background:#fef3c7;color:#92400e">
+      <i class="fas fa-triangle-exclamation"></i>
+      <span>⚠️ ${parts.join(' · ')}</span>
+    </div>`;
+  }
+
+  const BORDER = { expired: 'border-red-400', urgent: 'border-yellow-400', soon: 'border-yellow-200', ok: '' };
+  const EXPIRY_TEXT_COLOR = { expired: 'text-red-500', urgent: 'text-orange-500', soon: 'text-yellow-600', ok: '' };
+
+  el.innerHTML = banner + items.map(ins => {
+    const status = getExpiryStatus(ins);
     const expiry = ins.end_date ? daysUntil(ins.end_date) : null;
-    const expiryClass = expiry !== null && expiry <= 30 ? 'text-red-500' : 'text-gray-400';
     const expiryText = expiry === null ? '' : expiry < 0 ? 'หมดอายุแล้ว' : expiry === 0 ? 'หมดวันนี้!' : `อีก ${expiry} วัน`;
+    const borderStyle = status !== 'ok' ? `border-width:2px` : '';
 
     return `
-    <div class="app-card rounded-xl shadow-sm border p-4 mb-3">
+    <div class="app-card rounded-xl shadow-sm border p-4 mb-3 ${BORDER[status]}" style="${borderStyle}">
       <div class="flex items-start justify-between gap-2">
         <div class="flex items-start gap-3 flex-1 min-w-0">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${INS_TYPE_COLOR[ins.type] || 'bg-gray-100 text-gray-600'}">
@@ -121,11 +148,12 @@ function renderList() {
       </div>
       ${ins.end_date ? `<div class="flex justify-between items-center mt-3 pt-2 border-t" style="border-color:var(--divider)">
         <p class="text-xs" style="color:var(--text-muted)">สิ้นสุด: ${formatDateShort(ins.end_date)}</p>
-        <p class="text-xs font-medium ${expiryClass}">${expiryText}</p>
+        <p class="text-xs font-semibold ${EXPIRY_TEXT_COLOR[status] || 'text-gray-400'}">${expiryText}</p>
       </div>` : ''}
       ${ins.notes ? `<p class="text-xs mt-2" style="color:var(--text-muted)">📝 ${ins.notes}</p>` : ''}
-      <div class="mt-3">
-        <button onclick="deleteIns('${ins.id}')" class="w-full rounded-lg py-1.5 text-xs font-medium bg-red-50 text-red-500">ลบ</button>
+      <div class="mt-3 flex gap-2">
+        <button onclick='openEditIns(${JSON.stringify(ins)})' class="flex-1 rounded-lg py-1.5 text-xs font-medium" style="background:var(--divider);color:var(--text)">แก้ไข</button>
+        <button onclick="deleteIns('${ins.id}')" class="flex-1 rounded-lg py-1.5 text-xs font-medium bg-red-50 text-red-500">ลบ</button>
       </div>
     </div>`;
   }).join('');
@@ -143,7 +171,10 @@ function formatDateShort(dateStr) {
   return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 }
 
+let _editInsId = null;
+
 function openModal() {
+  _editInsId = null;
   document.getElementById('ins-name').value = '';
   document.getElementById('ins-provider').value = '';
   document.getElementById('ins-premium').value = '';
@@ -153,6 +184,22 @@ function openModal() {
   document.getElementById('ins-end').value = '';
   document.getElementById('ins-wallet').value = 'personal';
   document.getElementById('ins-type').value = 'life';
+  document.querySelector('#ins-modal .modal-header h2').textContent = 'เพิ่มกรมธรรม์';
+  document.getElementById('ins-modal').classList.remove('hidden');
+}
+
+function openEditIns(ins) {
+  _editInsId = ins.id;
+  document.getElementById('ins-name').value = ins.name || '';
+  document.getElementById('ins-provider').value = ins.provider || '';
+  document.getElementById('ins-premium').value = ins.premium_monthly || '';
+  document.getElementById('ins-coverage').value = ins.coverage_amount || '';
+  document.getElementById('ins-notes').value = ins.notes || '';
+  document.getElementById('ins-start').value = ins.start_date || '';
+  document.getElementById('ins-end').value = ins.end_date || '';
+  document.getElementById('ins-wallet').value = ins.wallet || 'personal';
+  document.getElementById('ins-type').value = ins.type || 'life';
+  document.querySelector('#ins-modal .modal-header h2').textContent = 'แก้ไขกรมธรรม์';
   document.getElementById('ins-modal').classList.remove('hidden');
 }
 
@@ -170,18 +217,23 @@ async function saveInsurance() {
   btn.textContent = 'กำลังบันทึก...';
   btn.disabled = true;
 
+  const payload = {
+    name,
+    type: document.getElementById('ins-type').value,
+    provider: document.getElementById('ins-provider').value,
+    premium_monthly: premium,
+    coverage_amount: parseFloat(document.getElementById('ins-coverage').value) || 0,
+    start_date: document.getElementById('ins-start').value,
+    end_date: document.getElementById('ins-end').value,
+    wallet: document.getElementById('ins-wallet').value,
+    notes: document.getElementById('ins-notes').value,
+  };
   try {
-    await API.addInsurance({
-      name,
-      type: document.getElementById('ins-type').value,
-      provider: document.getElementById('ins-provider').value,
-      premium_monthly: premium,
-      coverage_amount: parseFloat(document.getElementById('ins-coverage').value) || 0,
-      start_date: document.getElementById('ins-start').value,
-      end_date: document.getElementById('ins-end').value,
-      wallet: document.getElementById('ins-wallet').value,
-      notes: document.getElementById('ins-notes').value,
-    });
+    if (_editInsId) {
+      await API.updateInsurance({ ...payload, id: _editInsId });
+    } else {
+      await API.addInsurance(payload);
+    }
     closeModal();
     loadInsurance();
   } catch (e) {

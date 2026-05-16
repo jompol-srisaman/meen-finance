@@ -18,6 +18,17 @@ function sheetToObjects(sheet) {
   });
 }
 
+function sheetToObjectsWithRow(sheet) {
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return [];
+  const headers = data[0];
+  return data.slice(1).map(function(row, idx) {
+    const obj = { _row: idx + 2 };
+    headers.forEach(function(h, i) { obj[h] = row[i]; });
+    return obj;
+  });
+}
+
 function generateId() {
   return new Date().getTime().toString(36) + Math.random().toString(36).substr(2, 5);
 }
@@ -27,7 +38,7 @@ function generateId() {
 function getTransactions(month, year) {
   const sheet = getSpreadsheet().getSheetByName('Transactions');
   if (!sheet) return [];
-  const all = sheetToObjects(sheet);
+  const all = sheetToObjectsWithRow(sheet);
   if (!month && !year) return all;
   return all.filter(function(t) {
     if (!t.date) return false;
@@ -228,6 +239,10 @@ function addExpenseCategory(data) {
   const id = generateId();
   sheet.appendRow([id, data.name, data.type || 'other', parseFloat(data.monthly_budget) || 0]);
   return { success: true, id: id };
+}
+
+function updateExpenseCategory(data) {
+  return updateRowById(getSpreadsheet().getSheetByName('Expense_Categories'), data);
 }
 
 function deleteExpenseCategory(id) {
@@ -644,12 +659,41 @@ function getDashboard(month, year) {
   var now = new Date();
   var m = parseInt(month) || (now.getMonth() + 1);
   var y = parseInt(year) || now.getFullYear();
+  recordNetWorthSnapshot();
   return {
     balanceSheet: getBalanceSheet(),
     freedomMeter: getFreedomMeter(),
     incomeStatement: getIncomeStatement(m, y),
-    recentTransactions: getTransactions(m, y)
+    recentTransactions: getTransactions(m, y),
+    netWorthHistory: getNetWorthHistory()
   };
+}
+
+function updateTransaction(data) {
+  var sheet = getSpreadsheet().getSheetByName('Transactions');
+  if (!sheet) return { error: 'No Transactions sheet' };
+  var row = parseInt(data._row);
+  if (!row || row < 2) return { error: 'Invalid row' };
+  var values = [[
+    data.date || '',
+    data.type || 'expense',
+    data.category || 'อื่นๆ',
+    parseFloat(data.amount) || 0,
+    data.description || '',
+    data.wallet || 'personal',
+    data.account_id || ''
+  ]];
+  sheet.getRange(row, 1, 1, 7).setValues(values);
+  return { success: true };
+}
+
+function deleteTransaction(data) {
+  var sheet = getSpreadsheet().getSheetByName('Transactions');
+  if (!sheet) return { error: 'No Transactions sheet' };
+  var row = parseInt(data._row);
+  if (!row || row < 2) return { error: 'Invalid row' };
+  sheet.deleteRow(row);
+  return { success: true };
 }
 
 // ── Batch Import ─────────────────────────────────────────────
